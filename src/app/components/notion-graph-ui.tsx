@@ -148,7 +148,10 @@ interface IPullData {
   exercises: { [key: string]: string };
 }
 [];
-export function PullWoroutLineChart(props: { chartData: IPullData[] }) {
+export function PullWoroutLineChart(props: {
+  chartData: IPullData[];
+  exercise: string;
+}) {
   const [mode, setMode] = useState<TMode>("total weight");
   const [filteredData, setFilteredData] = useState<
     { date: string; value: number }[]
@@ -158,7 +161,7 @@ export function PullWoroutLineChart(props: { chartData: IPullData[] }) {
     setFilteredData(
       props.chartData.map((i) => ({
         date: i.date,
-        value: parseLog(i.exercises["lat pull down"], mode),
+        value: parseLog(i.exercises[props.exercise], mode),
       }))
     );
     console.log(filteredData);
@@ -168,7 +171,7 @@ export function PullWoroutLineChart(props: { chartData: IPullData[] }) {
     <Card className="relative">
       <CardHeader>
         <CardTitle className="flex justify-between items-center relative">
-          Pull workout data
+          {props.exercise}
           <DropDownModeBtn setMode={setMode} />
         </CardTitle>
       </CardHeader>
@@ -230,6 +233,7 @@ export default function NotionGraphUi() {
   // console.log(data);
   const [weightData, setWeightData] = useState<IChartData[]>([]);
   const [pullWorkoutData, setPullWorkoutData] = useState<IPullData[]>([]);
+  const [pullWorkouts, setPullWorkouts] = useState<string[]>([]);
 
   useEffect(() => {
     async function get() {
@@ -237,15 +241,37 @@ export default function NotionGraphUi() {
       const pull = await fetch("/api/pull");
       // console.log(await resp.json());
       setWeightData(await resp.json());
-      setPullWorkoutData(await pull.json());
+      const pullJson = await pull.json();
+      setPullWorkoutData(pullJson);
+
+      const pullExercises = Object.entries(pullJson[0].exercises).map(
+        ([k, v]) => k
+      );
+      setPullWorkouts(pullExercises);
     }
     get();
   }, []);
 
   return (
-    <div className="grid grid-cols-2 gap-4">
-      <ExerciseLineChart chartData={weightData} />
-      <PullWoroutLineChart chartData={pullWorkoutData} />
+    <div className="space-y-10">
+      <div>
+        <h2 className="text-xl font-semibold mb-5">Body weight</h2>
+        <div className="grid grid-cols-2 gap-4">
+          <ExerciseLineChart chartData={weightData} />
+        </div>
+      </div>
+      <div>
+        <h2 className="text-xl font-semibold mb-5">Pull workout</h2>
+        <div className="grid grid-cols-2 gap-4">
+          {pullWorkouts.map((exercise) => (
+            <PullWoroutLineChart
+              key={exercise}
+              chartData={pullWorkoutData}
+              exercise={exercise}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
