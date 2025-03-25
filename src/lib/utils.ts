@@ -118,8 +118,8 @@ export async function getWeightData() {
 
   return formatted;
 }
-
-export type TMode = "max weight" | "total weight";
+export const modes = ["max weight", "total weight", "max set"] as const;
+export type TMode = (typeof modes)[number];
 
 export const parseLog = (log: string, mode: TMode) => {
   const sets = log.split(" ").map((set) => {
@@ -140,6 +140,10 @@ export const parseLog = (log: string, mode: TMode) => {
   } else if (mode === "max weight") {
     return sets.reduce((acc, cur) => {
       return cur.weight > acc ? cur.weight : acc;
+    }, 0);
+  } else if (mode === "max set") {
+    return sets.reduce((acc, cur) => {
+      return cur.reps * cur.weight > acc ? cur.reps * cur.weight : acc;
     }, 0);
   } else {
     return 0;

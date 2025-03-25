@@ -4,6 +4,7 @@ import {
   getDatabase,
   getPages,
   getWeightData,
+  modes,
   notion,
   parseLog,
   TMode,
@@ -134,20 +135,17 @@ const DropDownModeBtn: React.FC<IDropDownModeBtnProps> = (props) => {
       <DropdownMenuContent className="w-56" align="end">
         <DropdownMenuLabel>Select mode of data</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => {
-            props.setMode("total weight");
-          }}
-        >
-          total weight
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => {
-            props.setMode("max weight");
-          }}
-        >
-          max weight
-        </DropdownMenuItem>
+
+        {modes.map((mode) => (
+          <DropdownMenuItem
+            key={mode}
+            onClick={() => {
+              props.setMode(mode);
+            }}
+          >
+            {mode}
+          </DropdownMenuItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );
