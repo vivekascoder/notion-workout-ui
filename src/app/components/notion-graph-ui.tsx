@@ -172,7 +172,7 @@ export function PullWoroutLineChart(props: {
           date: i.date,
           value: parseLog(i.exercises[props.exercise], mode),
         }))
-        .filter((i) => !isNaN(i.value))
+        .filter((i) => !isNaN(i.value) || i.value != 0)
     );
     console.log(filteredData);
   }, [mode, props.chartData]);
