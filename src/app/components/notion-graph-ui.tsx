@@ -159,10 +159,12 @@ export function PullWoroutLineChart(props: {
 
   useEffect(() => {
     setFilteredData(
-      props.chartData.map((i) => ({
-        date: i.date,
-        value: parseLog(i.exercises[props.exercise], mode),
-      }))
+      props.chartData
+        .map((i) => ({
+          date: i.date,
+          value: parseLog(i.exercises[props.exercise], mode),
+        }))
+        .filter((i) => !isNaN(i.value))
     );
     console.log(filteredData);
   }, [mode, props.chartData]);
@@ -253,16 +255,16 @@ export default function NotionGraphUi() {
   }, []);
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 md:mx-0 px-10">
       <div>
         <h2 className="text-xl font-semibold mb-5">Body weight</h2>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <ExerciseLineChart chartData={weightData} />
         </div>
       </div>
-      <div>
+      <div className="">
         <h2 className="text-xl font-semibold mb-5">Pull workout</h2>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {pullWorkouts.map((exercise) => (
             <PullWoroutLineChart
               key={exercise}

@@ -10,7 +10,7 @@ export default function Home() {
   return (
     <div className="max-w-4xl mx-auto">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <div className="flex items-center justify-between w-full py-5 ">
+        <div className="flex items-center justify-between w-full py-5 md:px-0 px-10">
           <h1 className="text-3xl font-semibold">📊 Notion workout logs UI</h1>
           <ModeToggle />
         </div>
