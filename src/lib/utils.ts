@@ -10,6 +10,7 @@ export function cn(...inputs: ClassValue[]) {
 export const databases = {
   pullWorkout: "1c039909ecfc80e58c88c700d74e98a0",
   weight: "1c039909ecfc801cbe6bc034bfb501eb",
+  pushWorkout: "1c039909ecfc80be8bb7dabde3f09529",
 };
 
 export const notion = new Client({
@@ -32,8 +33,12 @@ export async function getPages() {
 }
 
 export async function getPullWorkoutData() {
+  return await getSetsLogs(databases.pullWorkout);
+}
+
+const getSetsLogs = async (databaseId: string) => {
   const r = await notion.databases.query({
-    database_id: databases.pullWorkout,
+    database_id: databaseId,
   });
   const formatted: { date: string; exercises: { [key: string]: string } }[] =
     [];
@@ -46,6 +51,10 @@ export async function getPullWorkoutData() {
         obj[propertyName] = propertyValue;
       }
     );
+
+    if (!obj.date.date) {
+      continue;
+    }
 
     formatted.push({
       date: obj.date.date.start,
@@ -71,6 +80,10 @@ export async function getPullWorkoutData() {
   }
 
   return formatted;
+};
+
+export async function getPushWorkoutData() {
+  return getSetsLogs(databases.pushWorkout);
 }
 
 export async function getWeightData() {

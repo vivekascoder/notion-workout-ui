@@ -53,22 +53,24 @@ interface IChartData {
   weight: number;
 }
 
-export function ExerciseLineChart(props: { chartData: IChartData[] }) {
+export function BodyWeightLineChart(props: { chartData: IChartData[] }) {
   return (
     <Card>
       <CardHeader>
         <CardTitle>Body Weight progression</CardTitle>
         {/* <CardDescription></CardDescription> */}
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig}>
+      <CardContent className="mx-2 px-0">
+        <ChartContainer config={chartConfig} className="">
           <LineChart
             accessibilityLayer
             data={props.chartData}
-            margin={{
-              left: 12,
-              right: 12,
-            }}
+            margin={
+              {
+                // left: 12,
+                // right: 12,
+              }
+            }
           >
             <CartesianGrid vertical={false} />
             <XAxis
@@ -78,7 +80,10 @@ export function ExerciseLineChart(props: { chartData: IChartData[] }) {
               tickMargin={8}
               tickFormatter={(value) => {
                 const date = new Date(value);
-                return date.toLocaleString("default", { month: "short" });
+                return date.toLocaleDateString("default", {
+                  month: "short",
+                  day: "2-digit",
+                });
               }}
             />
             <ChartTooltip cursor={true} content={<ChartTooltipContent />} />
@@ -110,6 +115,7 @@ export function ExerciseLineChart(props: { chartData: IChartData[] }) {
   );
 }
 interface IDropDownModeBtnProps {
+  mode: TMode;
   setMode: Dispatch<SetStateAction<TMode>>;
 }
 
@@ -118,7 +124,7 @@ const DropDownModeBtn: React.FC<IDropDownModeBtnProps> = (props) => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size={"sm"}>
-          mode
+          M: {props.mode}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end">
@@ -174,18 +180,20 @@ export function PullWoroutLineChart(props: {
       <CardHeader>
         <CardTitle className="flex justify-between items-center relative">
           {props.exercise}
-          <DropDownModeBtn setMode={setMode} />
+          <DropDownModeBtn mode={mode} setMode={setMode} />
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="mx-2 px-0">
         <ChartContainer config={chartConfig}>
           <LineChart
             accessibilityLayer
             data={filteredData}
-            margin={{
-              left: 12,
-              right: 12,
-            }}
+            margin={
+              {
+                // left: 12,
+                // right: 12,
+              }
+            }
           >
             <CartesianGrid vertical={false} />
             <XAxis
@@ -220,7 +228,7 @@ export function PullWoroutLineChart(props: {
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">
           {/* Trending up by 5.2% this month <TrendingUp className="h-4 w-4" /> */}
-          showing body weight changes over time.
+          showing changes over time in {props.exercise} workouts.
         </div>
         {/* <div className="leading-none text-muted-foreground">
           Showing total visitors for the last 6 months
@@ -237,19 +245,29 @@ export default function NotionGraphUi() {
   const [pullWorkoutData, setPullWorkoutData] = useState<IPullData[]>([]);
   const [pullWorkouts, setPullWorkouts] = useState<string[]>([]);
 
+  const [pushWorkoutData, setPushWorkoutData] = useState<IPullData[]>([]);
+  const [pushWorkouts, setPushWorkouts] = useState<string[]>([]);
+
   useEffect(() => {
     async function get() {
       const resp = await fetch("/api/weight");
       const pull = await fetch("/api/pull");
+      const push = await fetch("/api/push");
       // console.log(await resp.json());
       setWeightData(await resp.json());
       const pullJson = await pull.json();
+      const pushJson = await push.json();
       setPullWorkoutData(pullJson);
+      setPushWorkoutData(pushJson);
 
       const pullExercises = Object.entries(pullJson[0].exercises).map(
         ([k, v]) => k
       );
+      const pushExercises = Object.entries(pushJson[0].exercises).map(
+        ([k, v]) => k
+      );
       setPullWorkouts(pullExercises);
+      setPushWorkouts(pushExercises);
     }
     get();
   }, []);
@@ -259,7 +277,7 @@ export default function NotionGraphUi() {
       <div>
         <h2 className="text-xl font-semibold mb-5">Body weight</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ExerciseLineChart chartData={weightData} />
+          <BodyWeightLineChart chartData={weightData} />
         </div>
       </div>
       <div className="">
@@ -269,6 +287,19 @@ export default function NotionGraphUi() {
             <PullWoroutLineChart
               key={exercise}
               chartData={pullWorkoutData}
+              exercise={exercise}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="">
+        <h2 className="text-xl font-semibold mb-5">Push workout</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {pushWorkouts.map((exercise) => (
+            <PullWoroutLineChart
+              key={exercise}
+              chartData={pushWorkoutData}
               exercise={exercise}
             />
           ))}
