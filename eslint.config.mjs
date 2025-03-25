@@ -14,6 +14,8 @@ const eslintConfig = [
   {
     rules: {
       "no-unused-vars": "off", // Ignore unused variables
+      "no-explicit-any": "off", // Ignore explicit any
+      "no-unused-expressions": "off", // Ignore unused expressions
     },
   },
 ];
