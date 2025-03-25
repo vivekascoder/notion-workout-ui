@@ -10,7 +10,7 @@ import {
 } from "@/lib/utils";
 import React from "react";
 import { TrendingUp } from "lucide-react";
-import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 import {
   Card,
@@ -40,7 +40,7 @@ import { DropdownMenuShortcut } from "@/components/ui/dropdown-menu";
 const chartConfig = {
   desktop: {
     label: "Desktop",
-    color: "blue",
+    color: "green",
   },
   mobile: {
     label: "Mobile",
@@ -65,12 +65,10 @@ export function BodyWeightLineChart(props: { chartData: IChartData[] }) {
           <LineChart
             accessibilityLayer
             data={props.chartData}
-            margin={
-              {
-                // left: 12,
-                // right: 12,
-              }
-            }
+            margin={{
+              left: 0,
+              right: 12,
+            }}
           >
             <CartesianGrid vertical={false} />
             <XAxis
@@ -86,6 +84,12 @@ export function BodyWeightLineChart(props: { chartData: IChartData[] }) {
                 });
               }}
             />
+            <YAxis
+              tickCount={6}
+              domain={["auto", "dataMax + 2"]}
+              interval="preserveStart"
+            />
+
             <ChartTooltip cursor={true} content={<ChartTooltipContent />} />
             <Line
               dataKey="weight"
@@ -208,6 +212,11 @@ export function PullWoroutLineChart(props: {
                   day: "2-digit",
                 });
               }}
+            />
+            <YAxis
+              // tickCount={6}
+              domain={["auto", "dataMax + 5"]}
+              interval="preserveStart"
             />
             <ChartTooltip cursor={true} content={<ChartTooltipContent />} />
             <Line
