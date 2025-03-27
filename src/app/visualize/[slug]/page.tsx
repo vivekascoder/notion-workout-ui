@@ -10,7 +10,7 @@ import VisualizeExercise from "@/components/VisualizePage";
 export default async function VisualizePage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
   const exercise = slug;
