@@ -154,7 +154,10 @@ export async function getWeightData() {
 export const modes = ["max weight", "total weight", "max set"] as const;
 export type TMode = (typeof modes)[number];
 
-export const parseLog = (log: string, mode: TMode) => {
+export const parseLog = (
+  log: string,
+  mode: TMode
+): { value: number; visual: string } => {
   const sets = log.split(" ").map((set) => {
     const d = set.split(".");
     const weight = parseInt(d[0]);
@@ -169,18 +172,44 @@ export const parseLog = (log: string, mode: TMode) => {
     const v = sets.reduce((acc, cur) => {
       return acc + cur.reps * cur.weight;
     }, 0);
-    return v;
+    return {
+      value: v,
+      visual: log,
+    };
   } else if (mode === "max weight") {
-    return sets.reduce((acc, cur) => {
+    const maxW = sets.reduce((acc, cur) => {
       return cur.weight > acc ? cur.weight : acc;
     }, 0);
+    return {
+      value: maxW,
+      visual: maxW.toString(),
+    };
   } else if (mode === "max set") {
-    return sets.reduce((acc, cur) => {
-      return cur.reps * cur.weight > acc ? cur.reps * cur.weight : acc;
-    }, 0);
-  } else {
-    return 0;
+    const maxS = sets.reduce(
+      (acc, cur) => {
+        if (cur.reps * cur.weight > acc.v) {
+          return {
+            v: cur.reps * cur.weight,
+            set: {
+              reps: cur.reps,
+              weight: cur.weight,
+            },
+          };
+        } else {
+          return acc;
+        }
+      },
+      { v: 0, set: { reps: 0, weight: 0 } }
+    );
+    return {
+      value: maxS.v,
+      visual: `${maxS.set.weight}x${maxS.set.reps}`,
+    };
   }
+  return {
+    value: 0,
+    visual: "",
+  };
 };
 
 // write main function, call it and log getWEightData()

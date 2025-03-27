@@ -158,7 +158,7 @@ export function PullWoroutLineChart(props: {
 }) {
   const [mode, setMode] = useState<TMode>("total weight");
   const [filteredData, setFilteredData] = useState<
-    { date: string; value: number }[]
+    { date: string; value: number; visual: string }[]
   >([]);
 
   useEffect(() => {
@@ -168,10 +168,14 @@ export function PullWoroutLineChart(props: {
         // .sort((a, b) => {
         //   return new Date(a.date).getTime() - new Date(b.date).getTime();
         // })
-        .map((i) => ({
-          date: i.date,
-          value: parseLog(i.sets, mode),
-        }))
+        .map((i) => {
+          const parsed = parseLog(i.sets, mode);
+          return {
+            date: i.date,
+            value: parsed.value,
+            visual: parsed.visual,
+          };
+        })
         .filter((i) => !isNaN(i.value) || i.value != 0)
     );
     // console.log(filteredData);
@@ -216,10 +220,31 @@ export function PullWoroutLineChart(props: {
               domain={["auto", "dataMax + 5"]}
               interval="preserveStart"
             />
-            <ChartTooltip cursor={true} content={<ChartTooltipContent />} />
+            <ChartTooltip
+              cursor={true}
+              content={
+                <ChartTooltipContent
+                  indicator="line"
+                  formatter={(value, name) => {
+                    return (
+                      <div className="flex min-w-[130px] items-center text-xs text-muted-foreground">
+                        {chartConfig[name as keyof typeof chartConfig]?.label ||
+                          name}
+                        <div className="ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground">
+                          {value}
+                          <span className="font-normal text-muted-foreground">
+                            KG
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  }}
+                />
+              }
+            />
             <Line
               dataKey="value"
-              type="natural"
+              type="linear"
               stroke="var(--color-desktop)"
               strokeWidth={2}
               dot={{
