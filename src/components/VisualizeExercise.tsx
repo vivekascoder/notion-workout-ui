@@ -12,15 +12,9 @@ export default function VisualizeExercise(props: { exercise: string }) {
 
   useEffect(() => {
     async function get() {
-      // const resp = await fetch("/api/weight");
-      const pull = await fetch("/api/workouts");
-      // const push = await fetch("/api/push");
-      // console.log(await resp.json());
-      // setWeightData(await resp.json());
+      const pull = await fetch("/api/workouts?exercise=" + props.exercise);
       const pullJson: IWorkoutApiResp = await pull.json();
-      // const pushJson = await push.json();
       setPullWorkoutData(pullJson.data);
-      // setPushWorkoutData(pushJson);
 
       const pullExercises = pullJson.exercises;
       // const pushExercises = Object.entries(pushJson[0].exercises).map(

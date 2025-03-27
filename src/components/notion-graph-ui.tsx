@@ -164,10 +164,10 @@ export function PullWoroutLineChart(props: {
   useEffect(() => {
     setFilteredData(
       props.chartData
-        .filter((i) => i.exercise === props.exercise)
-        .sort((a, b) => {
-          return new Date(a.date).getTime() - new Date(b.date).getTime();
-        })
+        // .filter((i) => i.exercise === props.exercise)
+        // .sort((a, b) => {
+        //   return new Date(a.date).getTime() - new Date(b.date).getTime();
+        // })
         .map((i) => ({
           date: i.date,
           value: parseLog(i.sets, mode),

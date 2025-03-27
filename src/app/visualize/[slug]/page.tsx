@@ -5,7 +5,7 @@ import {
   PullWoroutLineChart,
 } from "@/components/notion-graph-ui";
 import { ModeToggle } from "@/components/model-toggle";
-import VisualizeExercise from "@/components/VisualizePage";
+import VisualizeExercise from "@/components/VisualizeExercise";
 
 export default async function VisualizePage({
   params,

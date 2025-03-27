@@ -36,10 +36,20 @@ export async function getPages() {
 export async function getPullWorkoutData() {
   return await getSetsLogs(databases.pullWorkout);
 }
-
-const getSetsLogs = async (databaseId: string) => {
+type TSorts = { property: string; direction: "ascending" | "descending" }[];
+type TFilter = {
+  property: string;
+  select: { equals: string };
+};
+const getSetsLogs = async (
+  databaseId: string,
+  sorts?: TSorts,
+  filter?: TFilter
+) => {
   const r = await notion.databases.query({
     database_id: databaseId,
+    sorts: sorts,
+    filter: filter,
   });
   const formatted: { date: string; exercise: string; sets: string }[] = [];
 
@@ -87,8 +97,8 @@ export async function getPushWorkoutData() {
   return getSetsLogs(databases.pushWorkout);
 }
 
-export async function getWorkoutDbData() {
-  return getSetsLogs(databases.workoutDb);
+export async function getWorkoutDbData(sorts?: TSorts, filter?: TFilter) {
+  return getSetsLogs(databases.workoutDb, sorts, filter);
 }
 
 export async function getWorkoutExercises() {
