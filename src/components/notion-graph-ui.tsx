@@ -295,18 +295,6 @@ export default function NotionGraphUi() {
           description: `visualize the progression on ${e}`,
         }))}
       />
-      {/* <div className="">
-        <h2 className="text-xl font-semibold mb-5">Workouts Logs</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {pullWorkouts.map((exercise) => (
-            <PullWoroutLineChart
-              key={exercise}
-              chartData={pullWorkoutData}
-              exercise={exercise}
-            />
-          ))}
-        </div>
-      </div> */}
     </div>
   );
 }
