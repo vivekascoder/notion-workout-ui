@@ -11,6 +11,7 @@ export const databases = {
   pullWorkout: "1c039909ecfc80e58c88c700d74e98a0",
   weight: "1c039909ecfc801cbe6bc034bfb501eb",
   pushWorkout: "1c039909ecfc80be8bb7dabde3f09529",
+  workoutDb: "1c239909ecfc80dba883d445b26c599d",
 };
 
 export const notion = new Client({
@@ -40,8 +41,7 @@ const getSetsLogs = async (databaseId: string) => {
   const r = await notion.databases.query({
     database_id: databaseId,
   });
-  const formatted: { date: string; exercises: { [key: string]: string } }[] =
-    [];
+  const formatted: { date: string; exercise: string; sets: string }[] = [];
 
   for (const item of r.results) {
     const obj: { [key: string]: any } = {};
@@ -58,32 +58,55 @@ const getSetsLogs = async (databaseId: string) => {
 
     formatted.push({
       date: obj.date.date.start,
-      exercises: Object.fromEntries(
-        Object.entries(obj)
-          .filter(([k]) => k != "date")
-          .map(([k, v]) => {
-            let val: string;
-
-            if (v.type === "rich_text") {
-              val = v.rich_text.length > 0 ? v.rich_text[0].plain_text : "";
-            } else if (v.type === "number") {
-              val = v.number.toString();
-            } else if (v.type === "title") {
-              val = v.title.length > 0 ? v.title[0].plain_text : "";
-            } else {
-              val = "";
-            }
-            return [k, val];
-          })
-      ),
+      exercise: obj.exercise.select.name,
+      sets: getLogFromField(obj.log),
     });
   }
 
   return formatted;
 };
 
+export function getLogFromField(v: any) {
+  let val: string;
+
+  if (v.type === "rich_text") {
+    val = v.rich_text.length > 0 ? v.rich_text[0].plain_text : "";
+  } else if (v.type === "number") {
+    val = v.number.toString();
+  } else if (v.type === "title") {
+    val = v.title.length > 0 ? v.title[0].plain_text : "";
+  } else if (v.type === "select") {
+    val = v.select.name;
+  } else {
+    val = "";
+  }
+  return val;
+}
+
 export async function getPushWorkoutData() {
   return getSetsLogs(databases.pushWorkout);
+}
+
+export async function getWorkoutDbData() {
+  return getSetsLogs(databases.workoutDb);
+}
+
+export async function getWorkoutExercises() {
+  const response = await notion.databases.retrieve({
+    database_id: databases.workoutDb,
+  });
+  let exercises: string[] = [];
+
+  Object.entries((response as any).properties).forEach(
+    ([propertyName, propertyValue]) => {
+      if (propertyName === "exercise") {
+        exercises = (propertyValue as any).select.options.map(
+          (o: any) => o.name
+        );
+      }
+    }
+  );
+  return exercises;
 }
 
 export async function getWeightData() {
@@ -155,6 +178,23 @@ export const parseLog = (log: string, mode: TMode) => {
 async function main() {
   // console.log(await getPullWorkoutData());
   // console.log(parseLog("10.100 10.100 10.100", "max weigh"));
+  // console.log(
+  //   await await notion.pages.retrieve({
+  //     page_id: "1c239909-ecfc-8016-8954-fe5fa08d2ddd",
+  //   })
+  // );
+  // console.log();
+  const response = await getWorkoutDbData();
+  // const response = await notion.databases.retrieve({
+  //   database_id: databases.workoutDb,
+  // });
+  // const response = await getWorkoutExercises();
+  // const response = await notion.blocks.children.list({
+  //   block_id: "1c239909-ecfc-8016-8954-fe5fa08d2ddd",
+  //   page_size: 50,
+  // });
+  console.log(JSON.stringify(response, null, 2));
+  // console.log(await getSetsLogs(databases.pullWorkout));
 }
 
 main();

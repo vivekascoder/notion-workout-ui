@@ -153,9 +153,15 @@ const DropDownModeBtn: React.FC<IDropDownModeBtnProps> = (props) => {
 
 interface IPullData {
   date: string;
-  exercises: { [key: string]: string };
+  exercise: string;
+  sets: string;
 }
 [];
+
+interface IWorkoutApiResp {
+  exercises: string[];
+  data: IPullData[];
+}
 export function PullWoroutLineChart(props: {
   chartData: IPullData[];
   exercise: string;
@@ -168,13 +174,14 @@ export function PullWoroutLineChart(props: {
   useEffect(() => {
     setFilteredData(
       props.chartData
+        .filter((i) => i.exercise === props.exercise)
         .map((i) => ({
           date: i.date,
-          value: parseLog(i.exercises[props.exercise], mode),
+          value: parseLog(i.sets, mode),
         }))
         .filter((i) => !isNaN(i.value) || i.value != 0)
     );
-    console.log(filteredData);
+    // console.log(filteredData);
   }, [mode, props.chartData]);
 
   return (
@@ -257,36 +264,34 @@ export default function NotionGraphUi() {
 
   useEffect(() => {
     async function get() {
-      const resp = await fetch("/api/weight");
-      const pull = await fetch("/api/pull");
-      const push = await fetch("/api/push");
+      // const resp = await fetch("/api/weight");
+      const pull = await fetch("/api/workouts");
+      // const push = await fetch("/api/push");
       // console.log(await resp.json());
-      setWeightData(await resp.json());
-      const pullJson = await pull.json();
-      const pushJson = await push.json();
-      setPullWorkoutData(pullJson);
-      setPushWorkoutData(pushJson);
+      // setWeightData(await resp.json());
+      const pullJson: IWorkoutApiResp = await pull.json();
+      // const pushJson = await push.json();
+      setPullWorkoutData(pullJson.data);
+      // setPushWorkoutData(pushJson);
 
-      const pullExercises = Object.entries(pullJson[0].exercises).map(
-        ([k, v]) => k
-      );
-      const pushExercises = Object.entries(pushJson[0].exercises).map(
-        ([k, v]) => k
-      );
+      const pullExercises = pullJson.exercises;
+      // const pushExercises = Object.entries(pushJson[0].exercises).map(
+      //   ([k, v]) => k
+      // );
       setPullWorkouts(pullExercises);
-      setPushWorkouts(pushExercises);
+      // setPushWorkouts(pushExercises);
     }
     get();
   }, []);
 
   return (
     <div className="space-y-10 md:mx-0 px-2">
-      <div>
+      {/* <div>
         <h2 className="text-xl font-semibold mb-5">Body weight</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <BodyWeightLineChart chartData={weightData} />
         </div>
-      </div>
+      </div> */}
       <div className="">
         <h2 className="text-xl font-semibold mb-5">Pull workout</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -300,7 +305,7 @@ export default function NotionGraphUi() {
         </div>
       </div>
 
-      <div className="">
+      {/* <div className="">
         <h2 className="text-xl font-semibold mb-5">Push workout</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {pushWorkouts.map((exercise) => (
@@ -311,7 +316,7 @@ export default function NotionGraphUi() {
             />
           ))}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }
