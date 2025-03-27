@@ -184,7 +184,7 @@ async function main() {
   //   })
   // );
   // console.log();
-  const response = await getWorkoutDbData();
+  // const response = await getWorkoutDbData();
   // const response = await notion.databases.retrieve({
   //   database_id: databases.workoutDb,
   // });
@@ -193,7 +193,7 @@ async function main() {
   //   block_id: "1c239909-ecfc-8016-8954-fe5fa08d2ddd",
   //   page_size: 50,
   // });
-  console.log(JSON.stringify(response, null, 2));
+  // console.log(JSON.stringify(response, null, 2));
   // console.log(await getSetsLogs(databases.pullWorkout));
 }
 

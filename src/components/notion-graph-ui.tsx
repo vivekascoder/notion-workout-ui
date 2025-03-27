@@ -1,22 +1,11 @@
 "use client";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import {
-  getDatabase,
-  getPages,
-  getWeightData,
-  modes,
-  notion,
-  parseLog,
-  TMode,
-} from "@/lib/utils";
+import { modes, notion, parseLog, TMode } from "@/lib/utils";
 import React from "react";
-import { TrendingUp } from "lucide-react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
-
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -37,6 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { DropdownMenuShortcut } from "@/components/ui/dropdown-menu";
+import { LinkList } from "./link-list";
 
 const chartConfig = {
   desktop: {
@@ -151,14 +141,14 @@ const DropDownModeBtn: React.FC<IDropDownModeBtnProps> = (props) => {
   );
 };
 
-interface IPullData {
+export interface IPullData {
   date: string;
   exercise: string;
   sets: string;
 }
 [];
 
-interface IWorkoutApiResp {
+export interface IWorkoutApiResp {
   exercises: string[];
   data: IPullData[];
 }
@@ -175,6 +165,9 @@ export function PullWoroutLineChart(props: {
     setFilteredData(
       props.chartData
         .filter((i) => i.exercise === props.exercise)
+        .sort((a, b) => {
+          return new Date(a.date).getTime() - new Date(b.date).getTime();
+        })
         .map((i) => ({
           date: i.date,
           value: parseLog(i.sets, mode),
@@ -185,7 +178,7 @@ export function PullWoroutLineChart(props: {
   }, [mode, props.chartData]);
 
   return (
-    <Card className="relative">
+    <Card className="">
       <CardHeader>
         <CardTitle className="flex justify-between items-center relative">
           {props.exercise}
@@ -258,9 +251,7 @@ export default function NotionGraphUi() {
   const [weightData, setWeightData] = useState<IChartData[]>([]);
   const [pullWorkoutData, setPullWorkoutData] = useState<IPullData[]>([]);
   const [pullWorkouts, setPullWorkouts] = useState<string[]>([]);
-
-  const [pushWorkoutData, setPushWorkoutData] = useState<IPullData[]>([]);
-  const [pushWorkouts, setPushWorkouts] = useState<string[]>([]);
+  const [exercises, setExercises] = useState<string[]>([]);
 
   useEffect(() => {
     async function get() {
@@ -275,6 +266,7 @@ export default function NotionGraphUi() {
       // setPushWorkoutData(pushJson);
 
       const pullExercises = pullJson.exercises;
+      setExercises(pullExercises);
       // const pushExercises = Object.entries(pushJson[0].exercises).map(
       //   ([k, v]) => k
       // );
@@ -292,26 +284,24 @@ export default function NotionGraphUi() {
           <BodyWeightLineChart chartData={weightData} />
         </div>
       </div> */}
-      <div className="">
-        <h2 className="text-xl font-semibold mb-5">Pull workout</h2>
+
+      {/* write h2 tag as title of link list */}
+      <h2 className="text-xl font-semibold mb-5">Exercises</h2>
+
+      <LinkList
+        links={exercises.map((e) => ({
+          href: `/visualize/${e}`,
+          title: e.toLocaleUpperCase(),
+          description: `visualize the progression on ${e}`,
+        }))}
+      />
+      {/* <div className="">
+        <h2 className="text-xl font-semibold mb-5">Workouts Logs</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {pullWorkouts.map((exercise) => (
             <PullWoroutLineChart
               key={exercise}
               chartData={pullWorkoutData}
-              exercise={exercise}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* <div className="">
-        <h2 className="text-xl font-semibold mb-5">Push workout</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {pushWorkouts.map((exercise) => (
-            <PullWoroutLineChart
-              key={exercise}
-              chartData={pushWorkoutData}
               exercise={exercise}
             />
           ))}

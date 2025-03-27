@@ -1,10 +1,6 @@
 "use client";
-
-import Image from "next/image";
-import { Client } from "@notionhq/client";
-import { useEffect } from "react";
-import NotionGraphUi from "./components/notion-graph-ui";
-import { ModeToggle } from "./components/model-toggle";
+import NotionGraphUi from "../components/notion-graph-ui";
+import { ModeToggle } from "../components/model-toggle";
 
 export default function Home() {
   return (
