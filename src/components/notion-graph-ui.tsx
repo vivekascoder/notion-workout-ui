@@ -240,60 +240,11 @@ export function PullWoroutLineChart(props: {
         </CardTitle>
       </CardHeader>
       <CardContent className="mx-2 px-0">
-        {/* <ChartContainer config={chartConfig}>
-          <LineChart
-            accessibilityLayer
-            data={filteredData}
-            margin={
-              {
-                // left: 12,
-                // right: 12,
-              }
-            }
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              tickFormatter={(value) => {
-                const date = new Date(value);
-                return date.toLocaleString("default", {
-                  month: "short",
-                  day: "2-digit",
-                });
-              }}
-            />
-            <YAxis
-              // tickCount={6}
-              domain={["auto", "dataMax + 5"]}
-              interval="preserveStart"
-            />
-            <ChartTooltip
-              cursor={true}
-              content={<ChartTooltipContent indicator="line" />}
-            />
-            <Line
-              dataKey="value"
-              type="linear"
-              stroke="var(--color-desktop)"
-              strokeWidth={2}
-              dot={{
-                fill: "var(--color-desktop)",
-              }}
-              activeDot={{
-                r: 6,
-              }}
-            />
-          </LineChart>
-        </ChartContainer> */}
-        {/* time: Math.floor(v.timestamp!.getTime() / 1000) as UTCTimestamp,
-          value: Number(v.value!), */}
         <LWChart
           data={filteredData.map((v) => ({
             time: Math.floor(new Date(v.date).getTime() / 1000) as UTCTimestamp,
             value: Number(v.value),
+            visual: v.visual,
           }))}
         />
       </CardContent>
