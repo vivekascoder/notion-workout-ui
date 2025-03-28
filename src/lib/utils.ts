@@ -157,7 +157,14 @@ export type TMode = (typeof modes)[number];
 export const parseLog = (
   log: string,
   mode: TMode
-): { value: number; visual: string } => {
+): {
+  value: number;
+  visual: string;
+  sets: {
+    reps: number;
+    weight: number;
+  }[];
+} => {
   const sets = log.split(" ").map((set) => {
     const d = set.split(".");
     const weight = parseInt(d[0]);
@@ -175,6 +182,7 @@ export const parseLog = (
     return {
       value: v,
       visual: log,
+      sets,
     };
   } else if (mode === "max weight") {
     const maxW = sets.reduce((acc, cur) => {
@@ -183,6 +191,7 @@ export const parseLog = (
     return {
       value: maxW,
       visual: maxW.toString(),
+      sets,
     };
   } else if (mode === "max set") {
     const maxS = sets.reduce(
@@ -204,13 +213,52 @@ export const parseLog = (
     return {
       value: maxS.v,
       visual: `${maxS.set.weight}x${maxS.set.reps}`,
+      sets,
     };
   }
   return {
     value: 0,
     visual: "",
+    sets,
   };
 };
+export type TFilteredChartData = {
+  date: string;
+  value: number;
+  visual: string;
+}[];
+
+export function getMaxValue(data: TFilteredChartData) {
+  // clone the data
+  const dataClone: TFilteredChartData = JSON.parse(JSON.stringify(data));
+  return dataClone.sort((a, b) => b.value - a.value)[0];
+}
+export function getMinValue(data: TFilteredChartData) {
+  const dataClone: TFilteredChartData = JSON.parse(JSON.stringify(data));
+  return dataClone.sort((a, b) => a.value - b.value)[0];
+}
+
+export function getPnLDaily(data: TFilteredChartData) {
+  if (data.length <= 1) return "0"; // No PNL possible with 0 or 1 data point
+  return (
+    (data[data.length - 1].value / data[data.length - 2].value - 1) *
+    100
+  ).toFixed(2);
+}
+export function getStreak(data: TFilteredChartData) {
+  if (data.length <= 1) return 0; // No streak possible with 0 or 1 data point
+  let streak = 0;
+  let prev = data[0].value;
+  for (let i = 1; i < data.length; i++) {
+    if (data[i].value > prev) {
+      streak++;
+    } else {
+      streak = 0;
+    }
+    prev = data[i].value;
+  }
+  return streak;
+}
 
 // write main function, call it and log getWEightData()
 

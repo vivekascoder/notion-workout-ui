@@ -1,6 +1,15 @@
 "use client";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { modes, notion, parseLog, TMode } from "@/lib/utils";
+import {
+  cn,
+  getMaxValue,
+  getPnLDaily,
+  getStreak,
+  modes,
+  notion,
+  parseLog,
+  TMode,
+} from "@/lib/utils";
 import React from "react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import {
@@ -27,6 +36,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { DropdownMenuShortcut } from "@/components/ui/dropdown-menu";
 import { LinkList } from "./link-list";
+import { Skeleton } from "./ui/skeleton";
+import {
+  ArrowDown,
+  ArrowUp,
+  Award,
+  BarChart2,
+  Calendar,
+  ChevronUp,
+  Clock,
+  Dumbbell,
+  TrendingUp,
+} from "lucide-react";
 
 const chartConfig = {
   desktop: {
@@ -81,7 +102,10 @@ export function BodyWeightLineChart(props: { chartData: IChartData[] }) {
               interval="preserveStart"
             />
 
-            <ChartTooltip cursor={true} content={<ChartTooltipContent />} />
+            <ChartTooltip
+              cursor={true}
+              content={<ChartTooltipContent indicator="line" />}
+            />
             <Line
               dataKey="weight"
               type="natural"
@@ -152,6 +176,7 @@ export interface IWorkoutApiResp {
   exercises: string[];
   data: IPullData[];
 }
+
 export function PullWoroutLineChart(props: {
   chartData: IPullData[];
   exercise: string;
@@ -160,26 +185,49 @@ export function PullWoroutLineChart(props: {
   const [filteredData, setFilteredData] = useState<
     { date: string; value: number; visual: string }[]
   >([]);
+  const [max, setMax] = useState<
+    { date: string; value: number; visual: string } | undefined
+  >();
+  const [daily, setDaily] = useState<number>(0);
+  const [averageWeight, setAverageWeight] = useState<number>(0);
+  const [averageSet, setAverageSet] = useState<number>(0);
 
   useEffect(() => {
-    setFilteredData(
-      props.chartData
-        // .filter((i) => i.exercise === props.exercise)
-        // .sort((a, b) => {
-        //   return new Date(a.date).getTime() - new Date(b.date).getTime();
-        // })
-        .map((i) => {
-          const parsed = parseLog(i.sets, mode);
-          return {
-            date: i.date,
-            value: parsed.value,
-            visual: parsed.visual,
-          };
-        })
-        .filter((i) => !isNaN(i.value) || i.value != 0)
-    );
+    let totalW = 0;
+    let freqW = 0;
+    let totalS = 0;
+    let freqS = 0;
+    const filteredApiData = props.chartData
+      .map((i) => {
+        const parsed = parseLog(i.sets, mode);
+        parsed.sets.map((s) => {
+          totalW += s.weight;
+          freqW += 1;
+          totalS += s.reps;
+          freqS += 1;
+        });
+
+        return {
+          date: i.date,
+          value: parsed.value,
+          visual: parsed.visual,
+        };
+      })
+      .filter((i) => !isNaN(i.value) || i.value != 0);
+    setAverageWeight(totalW / freqW);
+    setAverageSet(totalS / freqS);
+
+    setFilteredData(filteredApiData);
+
+    setMax(getMaxValue(filteredApiData));
+    setDaily(parseFloat(getPnLDaily(filteredApiData)));
+
     // console.log(filteredData);
   }, [mode, props.chartData]);
+
+  if (!filteredData.length) {
+    return <Skeleton className=" h-40 rounded-md" />;
+  }
 
   return (
     <Card className="">
@@ -222,25 +270,7 @@ export function PullWoroutLineChart(props: {
             />
             <ChartTooltip
               cursor={true}
-              content={
-                <ChartTooltipContent
-                  indicator="line"
-                  formatter={(value, name) => {
-                    return (
-                      <div className="flex min-w-[130px] items-center text-xs text-muted-foreground">
-                        {chartConfig[name as keyof typeof chartConfig]?.label ||
-                          name}
-                        <div className="ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground">
-                          {value}
-                          <span className="font-normal text-muted-foreground">
-                            KG
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  }}
-                />
-              }
+              content={<ChartTooltipContent indicator="line" />}
             />
             <Line
               dataKey="value"
@@ -257,14 +287,138 @@ export function PullWoroutLineChart(props: {
           </LineChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none">
-          {/* Trending up by 5.2% this month <TrendingUp className="h-4 w-4" /> */}
-          showing changes over time in {props.exercise} workouts.
+      {/* <CardFooter className="block gap-2 text-sm">
+        <div className="flex gap-2 font-medium  justify-between items-center">
+          <p className="text-md">
+            <span className="fond-bold">Best: </span>
+            {(() => {
+              const max = getMaxValue(filteredData);
+              return `${max.visual} = ${max.value} KG`;
+            })()}
+          </p>
+          <p className="text-md">
+            <span className="fond-bold">Daily P/L: </span>
+            {`${getPnLDaily(filteredData)}%`}
+          </p>
         </div>
-        {/* <div className="leading-none text-muted-foreground">
-          Showing total visitors for the last 6 months
-        </div> */}
+      </CardFooter> */}
+      <CardFooter className="border-t border-gray-800 pt-4 pb-4 px-4">
+        <div className="w-full">
+          {/* Main stats row */}
+          <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mb-4">
+            <div className="bg-[var(--secondary)] rounded-lg p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400 text-xs">Personal Best</span>
+                <Award className="h-4 w-4 text-yellow-400" />
+              </div>
+              <div className="text-lg font-bold mt-1">{max?.visual}</div>
+              <div className="text-green-400 text-sm">{max?.value}kg total</div>
+            </div>
+
+            <div className="bg-[var(--secondary)] rounded-lg p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400 text-xs">Today</span>
+                <Clock className="h-4 w-4 text-blue-400" />
+              </div>
+              <div className="text-lg font-bold mt-1">
+                {filteredData[filteredData.length - 1].visual} kg
+              </div>
+              <div
+                className={cn(
+                  "text-sm flex items-center gap-1",
+                  daily < 0 ? "text-red-400" : "text-green-400"
+                )}
+              >
+                {daily < 0 ? (
+                  <ArrowDown className="h-3 w-3" />
+                ) : (
+                  <ArrowUp className="h-3 w-3" />
+                )}
+                {Math.abs(daily)}%
+              </div>
+            </div>
+
+            {/* <div className="bg-[var(--secondary)] rounded-lg p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400 text-xs">Max Potential</span>
+                <TrendingUp className="h-4 w-4 text-purple-400" />
+              </div>
+              <div className="text-lg font-bold mt-1">{10}% of max</div>
+              <div className="text-yellow-400 text-sm">{120}kg highest</div>
+            </div> */}
+
+            {/* <div className="bg-[var(--secondary)] rounded-lg p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400 text-xs">Avg Volume</span>
+                <BarChart2 className="h-4 w-4 text-green-400" />
+              </div>
+              <div className="text-lg font-bold mt-1">{100}kg</div>
+              <div className="text-blue-400 text-sm">{34}</div>
+            </div> */}
+          </div>
+
+          {/* Second stats row */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="bg-[var(--secondary)] rounded-lg p-3 flex items-center justify-between">
+              <div>
+                <div className="text-gray-400 text-xs">Daily</div>
+                <div
+                  className={cn(
+                    "flex items-center text-sm font-semibold",
+                    daily < 0 ? "text-red-400" : "text-green-400"
+                  )}
+                >
+                  {daily < 0 ? (
+                    <ArrowDown className="h-3 w-3 mr-1" />
+                  ) : (
+                    <ArrowUp className="h-3 w-3 mr-1" />
+                  )}
+                  {Math.abs(daily)}%
+                </div>
+              </div>
+              <Dumbbell className="h-5 w-5 text-gray-500" />
+            </div>
+
+            {/* <div className="bg-[var(--secondary)] rounded-lg p-3 flex items-center justify-between">
+              <div>
+                <div className="text-gray-400 text-xs">Weekly</div>
+                <div className="flex items-center text-sm font-semibold text-green-400">
+                  <ArrowUp className="h-3 w-3 mr-1" />
+                  {20}%
+                </div>
+              </div>
+              <Calendar className="h-5 w-5 text-gray-500" />
+            </div> */}
+
+            <div className="bg-[var(--secondary)] rounded-lg p-3 flex items-center justify-between">
+              <div>
+                <div className="text-gray-400 text-xs">Streak</div>
+                <div className="text-sm font-semibold text-orange-400">
+                  {getStreak(filteredData)} workouts
+                </div>
+              </div>
+              <ChevronUp className="h-5 w-5 text-orange-400" />
+            </div>
+            <div className="bg-[var(--secondary)] rounded-lg p-3 flex items-center justify-between">
+              <div>
+                <div className="text-gray-400 text-xs">Average Weight</div>
+                <div className="text-sm font-semibold text-orange-400">
+                  {averageWeight.toFixed(2)} KG
+                </div>
+              </div>
+              <ChevronUp className="h-5 w-5 text-orange-400" />
+            </div>
+            <div className="bg-[var(--secondary)] rounded-lg p-3 flex items-center justify-between">
+              <div>
+                <div className="text-gray-400 text-xs">Average Set</div>
+                <div className="text-sm font-semibold text-orange-400">
+                  {averageSet.toFixed(2)}
+                </div>
+              </div>
+              <ChevronUp className="h-5 w-5 text-orange-400" />
+            </div>
+          </div>
+        </div>
       </CardFooter>
     </Card>
   );
