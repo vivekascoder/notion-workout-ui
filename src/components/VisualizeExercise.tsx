@@ -5,6 +5,7 @@ import {
   IWorkoutApiResp,
   PullWoroutLineChart,
 } from "./notion-graph-ui";
+import LWChart from "./lw-chart";
 
 export default function VisualizeExercise(props: { exercise: string }) {
   const [pullWorkoutData, setPullWorkoutData] = useState<IPullData[]>([]);
@@ -32,6 +33,7 @@ export default function VisualizeExercise(props: { exercise: string }) {
           chartData={pullWorkoutData}
           exercise={props.exercise}
         />
+        {/* <LWChart /> */}
       </div>
     </div>
   );

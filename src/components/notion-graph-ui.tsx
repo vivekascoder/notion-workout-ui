@@ -48,6 +48,8 @@ import {
   Dumbbell,
   TrendingUp,
 } from "lucide-react";
+import LWChart from "./lw-chart";
+import { UTCTimestamp } from "lightweight-charts";
 
 const chartConfig = {
   desktop: {
@@ -238,7 +240,7 @@ export function PullWoroutLineChart(props: {
         </CardTitle>
       </CardHeader>
       <CardContent className="mx-2 px-0">
-        <ChartContainer config={chartConfig}>
+        {/* <ChartContainer config={chartConfig}>
           <LineChart
             accessibilityLayer
             data={filteredData}
@@ -285,7 +287,15 @@ export function PullWoroutLineChart(props: {
               }}
             />
           </LineChart>
-        </ChartContainer>
+        </ChartContainer> */}
+        {/* time: Math.floor(v.timestamp!.getTime() / 1000) as UTCTimestamp,
+          value: Number(v.value!), */}
+        <LWChart
+          data={filteredData.map((v) => ({
+            time: Math.floor(new Date(v.date).getTime() / 1000) as UTCTimestamp,
+            value: Number(v.value),
+          }))}
+        />
       </CardContent>
       {/* <CardFooter className="block gap-2 text-sm">
         <div className="flex gap-2 font-medium  justify-between items-center">
