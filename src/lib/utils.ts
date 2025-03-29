@@ -245,6 +245,17 @@ export function getPnLDaily(data: TFilteredChartData) {
     100
   ).toFixed(2);
 }
+
+// export function getWeightPRs(data: TFilteredChartData) {
+//   if (data.length <= 1) return []; // No PR possible with 0 or 1 data point
+
+//   // weight and max reps
+//   const prs: { [key: number]: number } = {};
+//   for (const d of data) {
+
+//   }
+// }
+
 export function getStreak(data: TFilteredChartData) {
   if (data.length <= 1) return 0; // No streak possible with 0 or 1 data point
   let streak = 0;

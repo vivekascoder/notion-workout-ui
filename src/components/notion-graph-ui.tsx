@@ -40,6 +40,7 @@ import { Skeleton } from "./ui/skeleton";
 import {
   ArrowDown,
   ArrowUp,
+  ArrowUpDown,
   Award,
   BarChart2,
   Calendar,
@@ -193,12 +194,16 @@ export function PullWoroutLineChart(props: {
   const [daily, setDaily] = useState<number>(0);
   const [averageWeight, setAverageWeight] = useState<number>(0);
   const [averageSet, setAverageSet] = useState<number>(0);
+  const [weightPRs, setWeightPRs] = useState<
+    { weight: number; reps: number }[]
+  >([]);
 
   useEffect(() => {
     let totalW = 0;
     let freqW = 0;
     let totalS = 0;
     let freqS = 0;
+    const prs: { [key: number]: number } = {};
     const filteredApiData = props.chartData
       .map((i) => {
         const parsed = parseLog(i.sets, mode);
@@ -207,6 +212,13 @@ export function PullWoroutLineChart(props: {
           freqW += 1;
           totalS += s.reps;
           freqS += 1;
+          if (prs[s.weight] == null) {
+            prs[s.weight] = s.reps;
+          } else {
+            if (prs[s.weight] < s.reps) {
+              prs[s.weight] = s.reps;
+            }
+          }
         });
 
         return {
@@ -223,6 +235,9 @@ export function PullWoroutLineChart(props: {
 
     setMax(getMaxValue(filteredApiData));
     setDaily(parseFloat(getPnLDaily(filteredApiData)));
+    setWeightPRs(
+      Object.entries(prs).map(([k, v]) => ({ weight: +k, reps: v }))
+    );
 
     // console.log(filteredData);
   }, [mode, props.chartData]);
@@ -232,23 +247,26 @@ export function PullWoroutLineChart(props: {
   }
 
   return (
-    <Card className="">
-      <CardHeader>
-        <CardTitle className="flex justify-between items-center relative">
-          {props.exercise}
-          <DropDownModeBtn mode={mode} setMode={setMode} />
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="mx-2 px-0">
-        <LWChart
-          data={filteredData.map((v) => ({
-            time: Math.floor(new Date(v.date).getTime() / 1000) as UTCTimestamp,
-            value: Number(v.value),
-            visual: v.visual,
-          }))}
-        />
-      </CardContent>
-      {/* <CardFooter className="block gap-2 text-sm">
+    <div>
+      <Card className="">
+        <CardHeader>
+          <CardTitle className="flex justify-between items-center relative">
+            {props.exercise}
+            <DropDownModeBtn mode={mode} setMode={setMode} />
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="mx-2 px-0">
+          <LWChart
+            data={filteredData.map((v) => ({
+              time: Math.floor(
+                new Date(v.date).getTime() / 1000
+              ) as UTCTimestamp,
+              value: Number(v.value),
+              visual: v.visual,
+            }))}
+          />
+        </CardContent>
+        {/* <CardFooter className="block gap-2 text-sm">
         <div className="flex gap-2 font-medium  justify-between items-center">
           <p className="text-md">
             <span className="fond-bold">Best: </span>
@@ -263,43 +281,45 @@ export function PullWoroutLineChart(props: {
           </p>
         </div>
       </CardFooter> */}
-      <CardFooter className="border-t border-gray-800 pt-4 pb-4 px-4">
-        <div className="w-full">
-          {/* Main stats row */}
-          <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mb-4">
-            <div className="bg-[var(--secondary)] rounded-lg p-3">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-400 text-xs">Personal Best</span>
-                <Award className="h-4 w-4 text-yellow-400" />
+        <CardFooter className="border-t border-gray-800 pt-4 pb-4 px-4">
+          <div className="w-full">
+            {/* Main stats row */}
+            <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mb-4">
+              <div className="bg-[var(--secondary)] rounded-lg p-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400 text-xs">Personal Best</span>
+                  <Award className="h-4 w-4 text-yellow-400" />
+                </div>
+                <div className="text-lg font-bold mt-1">{max?.visual}</div>
+                <div className="text-green-400 text-sm">
+                  {max?.value}kg total
+                </div>
               </div>
-              <div className="text-lg font-bold mt-1">{max?.visual}</div>
-              <div className="text-green-400 text-sm">{max?.value}kg total</div>
-            </div>
 
-            <div className="bg-[var(--secondary)] rounded-lg p-3">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-400 text-xs">Today</span>
-                <Clock className="h-4 w-4 text-blue-400" />
+              <div className="bg-[var(--secondary)] rounded-lg p-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400 text-xs">Today</span>
+                  <Clock className="h-4 w-4 text-blue-400" />
+                </div>
+                <div className="text-lg font-bold mt-1">
+                  {filteredData[filteredData.length - 1].visual} kg
+                </div>
+                <div
+                  className={cn(
+                    "text-sm flex items-center gap-1",
+                    daily < 0 ? "text-red-400" : "text-green-400"
+                  )}
+                >
+                  {daily < 0 ? (
+                    <ArrowDown className="h-3 w-3" />
+                  ) : (
+                    <ArrowUp className="h-3 w-3" />
+                  )}
+                  {Math.abs(daily)}%
+                </div>
               </div>
-              <div className="text-lg font-bold mt-1">
-                {filteredData[filteredData.length - 1].visual} kg
-              </div>
-              <div
-                className={cn(
-                  "text-sm flex items-center gap-1",
-                  daily < 0 ? "text-red-400" : "text-green-400"
-                )}
-              >
-                {daily < 0 ? (
-                  <ArrowDown className="h-3 w-3" />
-                ) : (
-                  <ArrowUp className="h-3 w-3" />
-                )}
-                {Math.abs(daily)}%
-              </div>
-            </div>
 
-            {/* <div className="bg-[var(--secondary)] rounded-lg p-3">
+              {/* <div className="bg-[var(--secondary)] rounded-lg p-3">
               <div className="flex items-center justify-between">
                 <span className="text-gray-400 text-xs">Max Potential</span>
                 <TrendingUp className="h-4 w-4 text-purple-400" />
@@ -308,7 +328,7 @@ export function PullWoroutLineChart(props: {
               <div className="text-yellow-400 text-sm">{120}kg highest</div>
             </div> */}
 
-            {/* <div className="bg-[var(--secondary)] rounded-lg p-3">
+              {/* <div className="bg-[var(--secondary)] rounded-lg p-3">
               <div className="flex items-center justify-between">
                 <span className="text-gray-400 text-xs">Avg Volume</span>
                 <BarChart2 className="h-4 w-4 text-green-400" />
@@ -316,31 +336,31 @@ export function PullWoroutLineChart(props: {
               <div className="text-lg font-bold mt-1">{100}kg</div>
               <div className="text-blue-400 text-sm">{34}</div>
             </div> */}
-          </div>
-
-          {/* Second stats row */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-[var(--secondary)] rounded-lg p-3 flex items-center justify-between">
-              <div>
-                <div className="text-gray-400 text-xs">Daily</div>
-                <div
-                  className={cn(
-                    "flex items-center text-sm font-semibold",
-                    daily < 0 ? "text-red-400" : "text-green-400"
-                  )}
-                >
-                  {daily < 0 ? (
-                    <ArrowDown className="h-3 w-3 mr-1" />
-                  ) : (
-                    <ArrowUp className="h-3 w-3 mr-1" />
-                  )}
-                  {Math.abs(daily)}%
-                </div>
-              </div>
-              <Dumbbell className="h-5 w-5 text-gray-500" />
             </div>
 
-            {/* <div className="bg-[var(--secondary)] rounded-lg p-3 flex items-center justify-between">
+            {/* Second stats row */}
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-[var(--secondary)] rounded-lg p-3 flex items-center justify-between">
+                <div>
+                  <div className="text-gray-400 text-xs">Daily</div>
+                  <div
+                    className={cn(
+                      "flex items-center text-sm font-semibold",
+                      daily < 0 ? "text-red-400" : "text-green-400"
+                    )}
+                  >
+                    {daily < 0 ? (
+                      <ArrowDown className="h-3 w-3 mr-1" />
+                    ) : (
+                      <ArrowUp className="h-3 w-3 mr-1" />
+                    )}
+                    {Math.abs(daily)}%
+                  </div>
+                </div>
+                <Dumbbell className="h-5 w-5 text-gray-500" />
+              </div>
+
+              {/* <div className="bg-[var(--secondary)] rounded-lg p-3 flex items-center justify-between">
               <div>
                 <div className="text-gray-400 text-xs">Weekly</div>
                 <div className="flex items-center text-sm font-semibold text-green-400">
@@ -351,37 +371,61 @@ export function PullWoroutLineChart(props: {
               <Calendar className="h-5 w-5 text-gray-500" />
             </div> */}
 
-            <div className="bg-[var(--secondary)] rounded-lg p-3 flex items-center justify-between">
-              <div>
-                <div className="text-gray-400 text-xs">Streak</div>
-                <div className="text-sm font-semibold text-orange-400">
-                  {getStreak(filteredData)} workouts
+              <div className="bg-[var(--secondary)] rounded-lg p-3 flex items-center justify-between">
+                <div>
+                  <div className="text-gray-400 text-xs">Streak</div>
+                  <div className="text-sm font-semibold text-orange-400">
+                    {getStreak(filteredData)} workouts
+                  </div>
                 </div>
+                <ChevronUp className="h-5 w-5 text-orange-400" />
               </div>
-              <ChevronUp className="h-5 w-5 text-orange-400" />
-            </div>
-            <div className="bg-[var(--secondary)] rounded-lg p-3 flex items-center justify-between">
-              <div>
-                <div className="text-gray-400 text-xs">Average Weight</div>
-                <div className="text-sm font-semibold text-orange-400">
-                  {averageWeight.toFixed(2)} KG
+              <div className="bg-[var(--secondary)] rounded-lg p-3 flex items-center justify-between">
+                <div>
+                  <div className="text-gray-400 text-xs">Average Weight</div>
+                  <div className="text-sm font-semibold text-orange-400">
+                    {averageWeight.toFixed(2)} KG
+                  </div>
                 </div>
+                <ChevronUp className="h-5 w-5 text-orange-400" />
               </div>
-              <ChevronUp className="h-5 w-5 text-orange-400" />
-            </div>
-            <div className="bg-[var(--secondary)] rounded-lg p-3 flex items-center justify-between">
-              <div>
-                <div className="text-gray-400 text-xs">Average Set</div>
-                <div className="text-sm font-semibold text-orange-400">
-                  {averageSet.toFixed(2)}
+              <div className="bg-[var(--secondary)] rounded-lg p-3 flex items-center justify-between">
+                <div>
+                  <div className="text-gray-400 text-xs">Average Set</div>
+                  <div className="text-sm font-semibold text-orange-400">
+                    {averageSet.toFixed(2)}
+                  </div>
                 </div>
+                <ChevronUp className="h-5 w-5 text-orange-400" />
               </div>
-              <ChevronUp className="h-5 w-5 text-orange-400" />
             </div>
           </div>
-        </div>
-      </CardFooter>
-    </Card>
+        </CardFooter>
+      </Card>
+
+      {/* weight prs card */}
+      <Card className="w-full mx-auto mt-10">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle>{props.exercise} PRs</CardTitle>
+          <div className="flex items-center space-x-2"></div>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-2">
+            {weightPRs.map((pr, index) => (
+              <li
+                key={index}
+                className="flex items-center justify-between p-3 rounded-md border bg-background hover:bg-accent transition-colors"
+              >
+                <span className="font-medium">{pr.weight} kg</span>
+                <span className="px-2 py-1 bg-muted rounded-md text-sm">
+                  {pr.reps} reps
+                </span>
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
