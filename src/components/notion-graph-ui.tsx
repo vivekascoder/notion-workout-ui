@@ -336,7 +336,7 @@ export function PullWoroutLineChart(props: {
                   <span className="text-gray-400 text-xs">Personal Best</span>
                   <Award className="h-4 w-4 text-yellow-400" />
                 </div>
-                <div className="text-lg font-bold mt-1">{max?.visual}</div>
+                <div className="text-sm font-bold mt-1">{max?.visual}</div>
                 <div className="text-green-400 text-sm">
                   {max?.value}kg total
                 </div>
@@ -347,7 +347,7 @@ export function PullWoroutLineChart(props: {
                   <span className="text-gray-400 text-xs">Today</span>
                   <Clock className="h-4 w-4 text-blue-400" />
                 </div>
-                <div className="text-lg font-bold mt-1">
+                <div className="text-sm font-bold mt-1">
                   {filteredData[filteredData.length - 1].visual} kg
                 </div>
                 <div
@@ -582,7 +582,7 @@ export function PullWoroutLineChart(props: {
               <PolarGrid gridType="circle" />
               <PolarAngleAxis
                 dataKey="rm1"
-                tickFormatter={(v) => `${v.toFixed(2)}kg`}
+                tickFormatter={(v) => `${v.toFixed(1)}kg`}
               />
 
               <Radar
