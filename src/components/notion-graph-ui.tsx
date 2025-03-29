@@ -405,7 +405,7 @@ export default function NotionGraphUi() {
       setPullWorkoutData(pullJson.data);
       // setPushWorkoutData(pushJson);
 
-      const pullExercises = pullJson.exercises;
+      const pullExercises = pullJson.exercises.sort();
       setExercises(pullExercises);
       // const pushExercises = Object.entries(pushJson[0].exercises).map(
       //   ([k, v]) => k
@@ -415,6 +415,10 @@ export default function NotionGraphUi() {
     }
     get();
   }, []);
+
+  if (!exercises.length) {
+    return <Skeleton className="h-40 rounded-md w-full" />;
+  }
 
   return (
     <div className="space-y-10 md:mx-0 px-2">

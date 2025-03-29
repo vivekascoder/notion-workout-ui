@@ -13,22 +13,13 @@ export default async function VisualizePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const exercise = slug;
+  const exercise = slug.replaceAll("%20", " ");
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <div className="flex items-center justify-between w-full py-5 md:px-0 px-2">
-          <h1 className="text-3xl font-semibold">
-            {`📈 Visualize ${exercise}`}{" "}
-          </h1>
-          <ModeToggle />
-        </div>
-
-        <div className="w-full">
-          <VisualizeExercise exercise={exercise} />
-        </div>
-      </main>
+    <div className="w-full">
+      <div className="w-full">
+        <VisualizeExercise exercise={exercise} />
+      </div>
       <footer className="mt-10 row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         <a href="https://vivek.ink" className="m-2">
           Made by: @vivek
