@@ -418,7 +418,15 @@ export function PullWoroutLineChart(props: {
                 key={index}
                 className="flex items-center justify-between p-3 rounded-md border bg-background hover:bg-accent transition-colors"
               >
-                <span className="font-medium">{pr.weight} kg</span>
+                <div>
+                  <span className="font-medium">{pr.weight} kg</span>
+                  <p className="text-xs">
+                    estimated 1 RM is{" "}
+                    <span className="text-green-500">
+                      {(pr.weight * (1 + pr.reps / 30)).toFixed(2)}kg
+                    </span>
+                  </p>
+                </div>
                 <span className="px-2 py-1 bg-muted rounded-md text-sm">
                   {pr.reps} reps
                 </span>
@@ -426,6 +434,11 @@ export function PullWoroutLineChart(props: {
             ))}
           </ul>
         </CardContent>
+        <CardFooter>
+          <p className="text-sm">
+            Note that that 1RM is computed using Epley formula
+          </p>
+        </CardFooter>
       </Card>
     </div>
   );
