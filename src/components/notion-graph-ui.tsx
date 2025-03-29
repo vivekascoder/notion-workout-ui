@@ -11,10 +11,21 @@ import {
   TMode,
 } from "@/lib/utils";
 import React from "react";
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  PolarAngleAxis,
+  PolarGrid,
+  RadarChart,
+  Radar,
+  XAxis,
+  YAxis,
+} from "recharts";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -198,6 +209,39 @@ export function PullWoroutLineChart(props: {
     { weight: number; reps: number }[]
   >([]);
 
+  const weightVs1RMData: {
+    date: string;
+    rm1: number;
+    weight: number;
+    visual: string;
+  }[] = [];
+
+  const repsVsWeightData: {
+    date: string;
+    reps: number;
+    weight: number;
+    visual: string;
+  }[] = [];
+
+  props.chartData.forEach((i) => {
+    const parsed = parseLog(i.sets, mode);
+    parsed.sets.map((s) => {
+      weightVs1RMData.push({
+        date: i.date,
+        rm1: s.weight * (1 + s.reps / 30),
+        weight: s.weight,
+        visual: `${s.weight} x ${s.reps}`,
+      });
+
+      repsVsWeightData.push({
+        date: i.date,
+        reps: s.reps,
+        weight: s.weight,
+        visual: `${s.weight} x ${s.reps}`,
+      });
+    });
+  });
+
   useEffect(() => {
     let totalW = 0;
     let freqW = 0;
@@ -237,7 +281,7 @@ export function PullWoroutLineChart(props: {
     setDaily(parseFloat(getPnLDaily(filteredApiData)));
     setWeightPRs(
       Object.entries(prs)
-        .map(([k, v]) => ({ weight: +k, reps: v }))
+        .map(([k, v]) => ({ weight: +k, reps: v, rm1: +k * (1 + v / 30) }))
         .sort((a, b) => b.weight - a.weight)
     );
 
@@ -249,7 +293,7 @@ export function PullWoroutLineChart(props: {
   }
 
   return (
-    <div>
+    <div className="space-y-10">
       <Card className="">
         <CardHeader>
           <CardTitle className="flex justify-between items-center relative">
@@ -405,13 +449,154 @@ export function PullWoroutLineChart(props: {
         </CardFooter>
       </Card>
 
+      {/* 1rm vs weight chart */}
+      <Card className="">
+        <CardHeader>
+          <CardTitle className="flex justify-between items-center relative">
+            Estimated 1RM vs Weight
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="mx-2 px-0">
+          <ChartContainer config={chartConfig} className="">
+            <LineChart
+              accessibilityLayer
+              data={weightVs1RMData}
+              margin={{
+                left: 0,
+                right: 12,
+              }}
+            >
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="weight"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                tickFormatter={(value) => {
+                  return `${value.toFixed(1)}kg`;
+                }}
+              />
+              <YAxis
+                tickCount={6}
+                domain={["auto", "dataMax + 2"]}
+                interval="preserveStart"
+                tickFormatter={(value) => {
+                  return `${value.toFixed(1)}kg`;
+                }}
+              />
+
+              <ChartTooltip
+                cursor={true}
+                content={<ChartTooltipContent indicator="line" />}
+              />
+              <Line
+                dataKey="rm1"
+                type="natural"
+                stroke="var(--color-desktop)"
+                strokeWidth={2}
+                dot={{
+                  fill: "var(--color-desktop)",
+                }}
+                activeDot={{
+                  r: 6,
+                }}
+              />
+            </LineChart>
+          </ChartContainer>
+        </CardContent>
+      </Card>
+
+      {/* reps vs weight chart i.e intensity vs endurance */}
+      {/* <Card className="">
+        <CardHeader>
+          <CardTitle className="flex justify-between items-center relative">
+            Intensity vs endurance, i.e reps vs weight
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="mx-2 px-0">
+          <ChartContainer config={chartConfig} className="">
+            <LineChart
+              accessibilityLayer
+              data={repsVsWeightData}
+              margin={{
+                left: 0,
+                right: 12,
+              }}
+            >
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="reps"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                tickFormatter={(value) => {
+                  return value;
+                }}
+              />
+              <YAxis
+                tickCount={6}
+                domain={["auto", "dataMax + 2"]}
+                interval="preserveStart"
+                tickFormatter={(value) => {
+                  return `${value.toFixed(1)}kg`;
+                }}
+              />
+
+              <ChartTooltip
+                cursor={true}
+                content={<ChartTooltipContent indicator="line" />}
+              />
+              <Line
+                dataKey="weight"
+                type="natural"
+                stroke="var(--color-desktop)"
+                strokeWidth={2}
+                dot={{
+                  fill: "var(--color-desktop)",
+                }}
+                activeDot={{
+                  r: 6,
+                }}
+              />
+            </LineChart>
+          </ChartContainer>
+        </CardContent>
+      </Card> */}
+
       {/* weight prs card */}
-      <Card className="w-full mx-auto mt-10">
+      <Card className="w-full mx-auto ">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle>{props.exercise} PRs</CardTitle>
           <div className="flex items-center space-x-2"></div>
         </CardHeader>
         <CardContent>
+          <ChartContainer
+            config={chartConfig}
+            className="mx-auto aspect-square max-h-[250px]"
+          >
+            <RadarChart data={weightPRs}>
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent hideLabel />}
+              />
+              <PolarGrid gridType="circle" />
+              <PolarAngleAxis
+                dataKey="rm1"
+                tickFormatter={(v) => `${v.toFixed(2)}kg`}
+              />
+
+              <Radar
+                dataKey="weight"
+                fill="var(--color-desktop)"
+                fillOpacity={0.6}
+                dot={{
+                  r: 4,
+                  fillOpacity: 1,
+                }}
+              />
+            </RadarChart>
+          </ChartContainer>
+          <br />
           <ul className="space-y-2">
             {weightPRs.map((pr, index) => (
               <li
