@@ -236,7 +236,9 @@ export function PullWoroutLineChart(props: {
     setMax(getMaxValue(filteredApiData));
     setDaily(parseFloat(getPnLDaily(filteredApiData)));
     setWeightPRs(
-      Object.entries(prs).map(([k, v]) => ({ weight: +k, reps: v }))
+      Object.entries(prs)
+        .map(([k, v]) => ({ weight: +k, reps: v }))
+        .sort((a, b) => b.weight - a.weight)
     );
 
     // console.log(filteredData);
