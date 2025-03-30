@@ -54,6 +54,7 @@ import {
   ArrowUpDown,
   Award,
   BarChart2,
+  Book,
   Calendar,
   ChevronUp,
   Clock,
@@ -62,6 +63,9 @@ import {
 } from "lucide-react";
 import LWChart from "./lw-chart";
 import { UTCTimestamp } from "lightweight-charts";
+import { useStore } from "@/lib/state";
+import Link from "next/link";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 
 const chartConfig = {
   desktop: {
@@ -636,15 +640,25 @@ export default function NotionGraphUi() {
   const [pullWorkoutData, setPullWorkoutData] = useState<IPullData[]>([]);
   const [pullWorkouts, setPullWorkouts] = useState<string[]>([]);
   const [exercises, setExercises] = useState<string[]>([]);
+  const { databaseId, notionToken } = useStore.getState();
+  const hasHydrated = useStore((s) => s.hasHydrated);
 
   useEffect(() => {
     async function get() {
+      await useStore.persist.rehydrate();
       // const resp = await fetch("/api/weight");
-      const pull = await fetch("/api/workouts");
+      const pull = await fetch(
+        `/api/workouts?notionToken=${notionToken}&databaseId=${databaseId}`
+      );
+
+      if (pull.status == 400) {
+        return;
+      }
       // const push = await fetch("/api/push");
       // console.log(await resp.json());
       // setWeightData(await resp.json());
       const pullJson: IWorkoutApiResp = await pull.json();
+
       // const pushJson = await push.json();
       setPullWorkoutData(pullJson.data);
       // setPushWorkoutData(pushJson);
@@ -660,8 +674,14 @@ export default function NotionGraphUi() {
     get();
   }, []);
 
-  if (!exercises.length) {
+  if (!hasHydrated) {
     return <Skeleton className="h-40 rounded-md w-full" />;
+  }
+
+  if (notionToken) {
+    if (!exercises.length) {
+      return <Skeleton className="h-40 rounded-md w-full" />;
+    }
   }
 
   return (
@@ -674,15 +694,47 @@ export default function NotionGraphUi() {
       </div> */}
 
       {/* write h2 tag as title of link list */}
-      <h2 className="text-xl font-semibold mb-5">Exercises</h2>
 
-      <LinkList
-        links={exercises.map((e) => ({
-          href: `/visualize/${e}`,
-          title: e.toLocaleUpperCase(),
-          description: `visualize the progression on ${e}`,
-        }))}
-      />
+      {notionToken ? (
+        <div>
+          <h2 className="text-xl font-semibold mb-5">Exercises</h2>
+          <LinkList
+            links={exercises.map((e) => ({
+              href: `/visualize/${e}`,
+              title: e.toLocaleUpperCase(),
+              description: `visualize the progression on ${e}`,
+            }))}
+          />
+        </div>
+      ) : (
+        <>
+          <div>
+            <Alert>
+              <Book className="h-4 w-4" />
+              <AlertTitle>Make yours</AlertTitle>
+              <AlertDescription>
+                <div>
+                  Check out the{" "}
+                  <Link
+                    className="hover:underline hover:font-semibold hover:cursor-alias"
+                    href={"/setup"}
+                  >
+                    setup
+                  </Link>{" "}
+                  to make steup for ur workouts.
+                </div>
+              </AlertDescription>
+            </Alert>
+          </div>
+          <div>
+            <p>Setup ur Notion token and database id first</p>
+            <Button className="mt-3">
+              {" "}
+              <Link href="/setup">Setup page</Link>
+            </Button>
+          </div>
+        </>
+      )}
     </div>
   );
 }

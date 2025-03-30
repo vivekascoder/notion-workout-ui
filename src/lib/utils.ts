@@ -26,6 +26,19 @@ export async function getDatabase() {
   return response;
 }
 
+export async function getDatabaseInitTest(
+  notionToken: string,
+  databaseId: string
+) {
+  const notion = new Client({
+    auth: notionToken,
+  });
+  const response = await notion.databases.retrieve({
+    database_id: databaseId,
+  });
+  return response;
+}
+
 export async function getPages() {
   const r = await notion.databases.query({
     database_id: "1c039909ecfc80e58c88c700d74e98a0",
@@ -41,6 +54,7 @@ type TFilter = {
   property: string;
   select: { equals: string };
 };
+
 const getSetsLogs = async (
   databaseId: string,
   sorts?: TSorts,
@@ -101,9 +115,46 @@ export async function getWorkoutDbData(sorts?: TSorts, filter?: TFilter) {
   return getSetsLogs(databases.workoutDb, sorts, filter);
 }
 
+export async function getWorkoutDbDataForToken(
+  notionToken: string,
+  databaseId: string,
+  sorts?: TSorts,
+  filter?: TFilter
+) {
+  const notion = new Client({
+    auth: notionToken,
+  });
+  return getSetsLogs(databaseId, sorts, filter);
+}
+
 export async function getWorkoutExercises() {
   const response = await notion.databases.retrieve({
     database_id: databases.workoutDb,
+  });
+  let exercises: string[] = [];
+
+  Object.entries((response as any).properties).forEach(
+    ([propertyName, propertyValue]) => {
+      if (propertyName === "exercise") {
+        exercises = (propertyValue as any).select.options.map(
+          (o: any) => o.name
+        );
+      }
+    }
+  );
+  return exercises;
+}
+
+export async function getWorkoutExercisesForToken(
+  notionToken: string,
+  databaseId: string
+) {
+  const notion = new Client({
+    auth: notionToken,
+  });
+
+  const response = await notion.databases.retrieve({
+    database_id: databaseId,
   });
   let exercises: string[] = [];
 
@@ -145,8 +196,6 @@ export async function getWeightData() {
       date: obj.Date.date.start,
       weight: obj.weight.number,
     });
-
-    // console.log(obj);
   }
 
   return formatted;

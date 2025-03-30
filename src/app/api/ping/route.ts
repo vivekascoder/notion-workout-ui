@@ -1,4 +1,5 @@
 import {
+  getDatabaseInitTest,
   getWeightData,
   getWorkoutDbData,
   getWorkoutDbDataForToken,
@@ -11,7 +12,6 @@ export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
   const notionToken = searchParams.get("notionToken");
   const databaseId = searchParams.get("databaseId");
-
   if (!notionToken || !databaseId) {
     return new Response(
       JSON.stringify({ error: "Notion token and database ID are required." }),
@@ -24,27 +24,12 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const exercise = searchParams.get("exercise");
+  const resp = await getWorkoutExercisesForToken(notionToken, databaseId);
 
-  const weightData = await getWorkoutDbDataForToken(
-    notionToken,
-    databaseId,
-    [{ direction: "ascending", property: "date" }],
-    exercise
-      ? { property: "exercise", select: { equals: exercise } }
-      : undefined
-  );
-  const exercisesName = await getWorkoutExercisesForToken(
-    notionToken,
-    databaseId
-  );
-  return new Response(
-    JSON.stringify({ exercises: exercisesName, data: weightData }),
-    {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
+  return new Response(JSON.stringify({ success: true, data: resp }), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 }
