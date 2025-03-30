@@ -6,14 +6,19 @@ import {
   PullWoroutLineChart,
 } from "./notion-graph-ui";
 import LWChart from "./lw-chart";
+import { useStore } from "@/lib/state";
 
 export default function VisualizeExercise(props: { exercise: string }) {
   const [pullWorkoutData, setPullWorkoutData] = useState<IPullData[]>([]);
-  // const [exercises, setExercises] = useState<string[]>([]);
+  const { databaseId, notionToken } = useStore.getState();
+  const hasHydrated = useStore((s) => s.hasHydrated);
 
   useEffect(() => {
     async function get() {
-      const pull = await fetch("/api/workouts?exercise=" + props.exercise);
+      const pull = await fetch(
+        `/api/workouts?notionToken=${notionToken}&databaseId=${databaseId}&exercise=${props.exercise}`
+      );
+
       const pullJson: IWorkoutApiResp = await pull.json();
       setPullWorkoutData(pullJson.data);
 

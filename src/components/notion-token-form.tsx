@@ -18,11 +18,13 @@ import { useFormik } from "formik";
 import { useStore } from "@/lib/state";
 import { Client } from "@notionhq/client";
 import { toast } from "sonner";
+import { Loader } from "lucide-react";
 
 // import { useToast } from "@/hooks/use-toast";
 
 export default function NotionTokenForm() {
   const setup = useStore((state) => state.setup);
+  const [isLoading, setIsLoading] = useState(false);
 
   const formik = useFormik({
     initialValues: {
@@ -30,18 +32,21 @@ export default function NotionTokenForm() {
       databaseId: "",
     },
     onSubmit: async (values) => {
+      setIsLoading(true);
       try {
         const pull = await fetch(
           `/api/ping?notionToken=${values.notionToken}&databaseId=${values.databaseId}`
         );
-        if (pull.status === 400) {
+        if (pull.status !== 200) {
           throw new Error("Invalid token or database ID");
         }
       } catch (error: any) {
         toast("Invalid values: " + error.message);
+        setIsLoading(false);
         return;
       }
       toast("Setup completed, go to home page.");
+      setIsLoading(false);
 
       setup(values.notionToken, values.databaseId);
     },
@@ -83,8 +88,12 @@ export default function NotionTokenForm() {
           <br />
         </CardContent>
         <CardFooter>
-          <Button type="submit" className="w-full cursor-auto">
-            Save Configuration
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full cursor-auto"
+          >
+            {isLoading ? <Loader className="animate-spin" /> : "Connect Notion"}
           </Button>
         </CardFooter>
       </form>
