@@ -26,7 +26,7 @@ export const useStore = create<Store>()(
     }),
     {
       name: "track-store", // name of the item in the storage (must be unique)
-      storage: createJSONStorage(() => sessionStorage), // (optional) by default, 'localStorage' is used
+      storage: createJSONStorage(() => localStorage), // (optional) by default, 'localStorage' is used
       onRehydrateStorage: (state) => {
         return () => state.setHasHydrated(true);
       },
