@@ -16,7 +16,7 @@ export default function SetupPage({}: {}) {
   }
   return (
     <div className="w-full">
-      <div className="w-full">
+      <div className="w-full px-4">
         <h1 className="text-xl font-semibold mb-5"># Setup for ur workouts</h1>
 
         <div className="space-y-3">
