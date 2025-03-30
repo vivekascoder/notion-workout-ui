@@ -45,7 +45,7 @@ export default function RootLayout({
           <main className="max-w-2xl mx-auto">
             <div className="flex items-center justify-between w-full py-5 md:px-0 px-2">
               <Link href={"/"} className="text-3xl font-semibold">
-                📊 Workout Logs
+                📊 MadeThisToLift
               </Link>
               <ModeToggle />
             </div>

@@ -63,7 +63,7 @@ export default function NotionTokenForm() {
             <Input
               id="notion-token"
               name="notionToken"
-              placeholder="secret_..."
+              placeholder="ntn_..."
               onChange={formik.handleChange}
               value={formik.values.notionToken}
               required
@@ -74,7 +74,7 @@ export default function NotionTokenForm() {
             <Input
               name="databaseId"
               id="database-id"
-              placeholder="a1b2c3d4-..."
+              placeholder="a1b2c3d4..."
               onChange={formik.handleChange}
               value={formik.values.databaseId}
               required

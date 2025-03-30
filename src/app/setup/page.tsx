@@ -30,6 +30,19 @@ export default function SetupPage({}: {}) {
             </Link>
           </p>
           <p>
+            + generate a private integration on notion and get the notion token.
+          </p>
+          <p>
+            + go to ur copy of workout db and add the integration by clicking on
+            three dot on top right then connection then selection the
+            integration.{" "}
+          </p>
+          <p>
+            + let's say this is ur URL
+            https://www.notion.so/vivekascoder/1c239909ecfc80dba883d445b26c599d?v=1c339909ecfc803d83da000cfb02fc0b,
+            then database if is the first alphanumeric string before ?.
+          </p>
+          <p>
             + Add ur Notion token along with the database id in the following
             form.
           </p>
