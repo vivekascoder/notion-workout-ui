@@ -66,6 +66,7 @@ import { UTCTimestamp } from "lightweight-charts";
 import { useStore } from "@/lib/state";
 import Link from "next/link";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { Input } from "./ui/input";
 
 const chartConfig = {
   desktop: {
@@ -212,6 +213,15 @@ export function PullWoroutLineChart(props: {
   const [weightPRs, setWeightPRs] = useState<
     { weight: number; reps: number }[]
   >([]);
+  const [maxRM, setMaxRM] = useState<number>(0);
+
+  const [idealRepsWeight, setIdealRepsWeight] = useState<number>(10);
+  const onChangeRepsHandler = () => {
+    setIdealRepsWeight(idealRepsWeight);
+  };
+  const computeWFromR = (reps: number, rm: number) => {
+    return Math.round(rm / (1 + reps / 30));
+  };
 
   const weightVs1RMData: {
     date: string;
@@ -283,11 +293,14 @@ export function PullWoroutLineChart(props: {
 
     setMax(getMaxValue(filteredApiData));
     setDaily(parseFloat(getPnLDaily(filteredApiData)));
-    setWeightPRs(
-      Object.entries(prs)
-        .map(([k, v]) => ({ weight: +k, reps: v, rm1: +k * (1 + v / 30) }))
-        .sort((a, b) => b.weight - a.weight)
-    );
+    const sortedWPrs = Object.entries(prs)
+      .map(([k, v]) => ({ weight: +k, reps: v, rm1: +k * (1 + v / 30) }))
+      .sort((a, b) => b.weight - a.weight);
+    setWeightPRs(sortedWPrs);
+
+    if (sortedWPrs.length > 0) {
+      setMaxRM(sortedWPrs[0].rm1);
+    }
 
     // console.log(filteredData);
   }, [mode, props.chartData]);
@@ -368,24 +381,6 @@ export function PullWoroutLineChart(props: {
                   {Math.abs(daily)}%
                 </div>
               </div>
-
-              {/* <div className="bg-[var(--secondary)] rounded-lg p-3">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-400 text-xs">Max Potential</span>
-                <TrendingUp className="h-4 w-4 text-purple-400" />
-              </div>
-              <div className="text-lg font-bold mt-1">{10}% of max</div>
-              <div className="text-yellow-400 text-sm">{120}kg highest</div>
-            </div> */}
-
-              {/* <div className="bg-[var(--secondary)] rounded-lg p-3">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-400 text-xs">Avg Volume</span>
-                <BarChart2 className="h-4 w-4 text-green-400" />
-              </div>
-              <div className="text-lg font-bold mt-1">{100}kg</div>
-              <div className="text-blue-400 text-sm">{34}</div>
-            </div> */}
             </div>
 
             {/* Second stats row */}
@@ -409,17 +404,6 @@ export function PullWoroutLineChart(props: {
                 </div>
                 <Dumbbell className="h-5 w-5 text-gray-500" />
               </div>
-
-              {/* <div className="bg-[var(--secondary)] rounded-lg p-3 flex items-center justify-between">
-              <div>
-                <div className="text-gray-400 text-xs">Weekly</div>
-                <div className="flex items-center text-sm font-semibold text-green-400">
-                  <ArrowUp className="h-3 w-3 mr-1" />
-                  {20}%
-                </div>
-              </div>
-              <Calendar className="h-5 w-5 text-gray-500" />
-            </div> */}
 
               <div className="bg-[var(--secondary)] rounded-lg p-3 flex items-center justify-between">
                 <div>
@@ -510,6 +494,33 @@ export function PullWoroutLineChart(props: {
         </CardContent>
       </Card>
 
+      <Card className="">
+        <CardHeader>
+          <CardTitle className="flex justify-between items-center relative">
+            Estimated weight for reps
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="mx-2 space-y-5">
+          <div className="flex items-center justify-between ">
+            <Input
+              className="w-2/3"
+              type="number"
+              value={idealRepsWeight}
+              onChange={(e) => {
+                setIdealRepsWeight(Number(e.target.value));
+              }}
+              placeholder="Enter reps"
+            />
+            <span className="text-lg font-semibold">
+              {computeWFromR(idealRepsWeight, maxRM)}kg
+            </span>
+          </div>
+          <p className="text-sm">
+            ⚠️ NOTE: This computes the ideal weight u should lift for given reps
+            based on ur max 1RM from logs and Epely formula.
+          </p>
+        </CardContent>
+      </Card>
       {/* reps vs weight chart i.e intensity vs endurance */}
       {/* <Card className="">
         <CardHeader>
