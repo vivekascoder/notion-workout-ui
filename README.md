@@ -1,5 +1,7 @@
 # Notion workout UI
 
+Track workouts in Notion and visualize progress with powerful insights.
+
 [**track.vivek.ink**](http://track.vivek.ink) is a free, open-source workout tracker that uses your **Notion database** as the backend.  
 Log your workouts in Notion, and get clean, insightful visualizations of your performance, progress, and areas to improve — all in one place.
 
