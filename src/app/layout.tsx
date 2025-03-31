@@ -25,6 +25,12 @@ export const metadata: Metadata = {
 };
 
 import { Toaster } from "@/components/ui/sonner";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
+import { ReactQueryClientProvider } from "@/components/react-query-client-provider";
 
 export default function RootLayout({
   children,
@@ -40,22 +46,24 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider
-          attribute={"class"}
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <main className="max-w-2xl mx-auto">
-            <div className="flex items-center justify-between w-full py-5 md:px-0 px-2">
-              <Link href={"/"} className="text-3xl font-semibold">
-                📊 MadeThisToLift
-              </Link>
-              <ModeToggle />
-            </div>
-            <div>{children}</div>
-          </main>
-        </ThemeProvider>
+        <ReactQueryClientProvider>
+          <ThemeProvider
+            attribute={"class"}
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <main className="max-w-2xl mx-auto">
+              <div className="flex items-center justify-between w-full py-5 md:px-0 px-2">
+                <Link href={"/"} className="text-3xl font-semibold">
+                  📊 MadeThisToLift
+                </Link>
+                <ModeToggle />
+              </div>
+              <div>{children}</div>
+            </main>
+          </ThemeProvider>
+        </ReactQueryClientProvider>
         <Toaster />
 
         <div>

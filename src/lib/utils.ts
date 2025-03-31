@@ -7,6 +7,12 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+import { redirect } from "next/navigation";
+
+export async function navigate(path: string) {
+  redirect(path);
+}
+
 export const databases = {
   pullWorkout: "1c039909ecfc80e58c88c700d74e98a0",
   weight: "1c039909ecfc801cbe6bc034bfb501eb",

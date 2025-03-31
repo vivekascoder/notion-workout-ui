@@ -19,6 +19,8 @@ import { useStore } from "@/lib/state";
 import { Client } from "@notionhq/client";
 import { toast } from "sonner";
 import { Loader } from "lucide-react";
+import { redirect } from "next/navigation";
+import { navigate } from "@/lib/utils";
 
 // import { useToast } from "@/hooks/use-toast";
 
@@ -49,6 +51,7 @@ export default function NotionTokenForm() {
       setIsLoading(false);
 
       setup(values.notionToken, values.databaseId);
+      navigate("/");
     },
   });
 
