@@ -31,6 +31,7 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 import { ReactQueryClientProvider } from "@/components/react-query-client-provider";
+import { TransitionLink } from "@/components/transition-link";
 
 export default function RootLayout({
   children,
@@ -55,9 +56,9 @@ export default function RootLayout({
           >
             <main className="max-w-2xl mx-auto">
               <div className="flex items-center justify-between w-full py-5 md:px-0 px-2">
-                <Link href={"/"} className="text-3xl font-semibold">
+                <TransitionLink href={"/"} className="text-3xl font-semibold">
                   📊 MadeThisToLift
-                </Link>
+                </TransitionLink>
                 <ModeToggle />
               </div>
               <div>{children}</div>
@@ -81,12 +82,12 @@ export default function RootLayout({
             >
               github
             </a>
-            <Link
+            <TransitionLink
               href="/setup"
               className="text-white hover:text-gray-200 transition-colors duration-200 underline underline-offset-2"
             >
               setup
-            </Link>
+            </TransitionLink>
           </footer>
         </div>
       </body>
