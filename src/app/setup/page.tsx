@@ -19,7 +19,7 @@ export default function SetupPage({}: {}) {
       <div className="w-full px-4">
         <h1 className="text-xl font-semibold mb-5"># Setup for ur workouts</h1>
 
-        <div className="space-y-3">
+        <div className="space-y-3 break-words">
           <p>
             + Clone the notion template from here:{" "}
             <Link
