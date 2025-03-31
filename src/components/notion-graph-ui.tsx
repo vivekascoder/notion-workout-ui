@@ -596,12 +596,12 @@ export function PullWoroutLineChart(props: {
               />
               <PolarGrid gridType="circle" />
               <PolarAngleAxis
-                dataKey="rm1"
+                dataKey="weight"
                 tickFormatter={(v) => `${v.toFixed(1)}kg`}
               />
 
               <Radar
-                dataKey="weight"
+                dataKey="rm1"
                 fill="var(--color-desktop)"
                 fillOpacity={0.6}
                 dot={{
