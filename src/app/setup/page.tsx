@@ -1,6 +1,7 @@
 "use client";
 
 import NotionTokenForm from "@/components/notion-token-form";
+import { TransitionLink } from "@/components/transition-link";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useStore } from "@/lib/state";
@@ -82,7 +83,7 @@ export default function SetupPage({}: {}) {
             <p>Reset the credentials</p>
             <Button className="mt-3" onClick={() => setup("", "")}>
               {" "}
-              <Link href="/setup">Reset credentials</Link>
+              <TransitionLink href="/setup">Reset credentials</TransitionLink>
             </Button>
           </>
         ) : (

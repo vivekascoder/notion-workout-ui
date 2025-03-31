@@ -222,8 +222,6 @@ export function ExerciseChart(props: {
     if (sortedWPrs.length > 0) {
       setMaxRM(sortedWPrs[0].rm1);
     }
-
-    // console.log(filteredData);
   }, [mode, props.chartData]);
 
   if (!filteredData.length) {

@@ -68,6 +68,7 @@ import Link from "next/link";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { Input } from "./ui/input";
 import { useQuery } from "@tanstack/react-query";
+import { TransitionLink } from "./transition-link";
 
 const chartConfig = {
   desktop: {
@@ -167,8 +168,6 @@ export interface IWorkoutApiResp {
 }
 
 export default function NotionGraphUi() {
-  // const data = await getPages();
-  // console.log(data);
   const [weightData, setWeightData] = useState<IChartData[]>([]);
   const [pullWorkoutData, setPullWorkoutData] = useState<IPullData[]>([]);
   const [pullWorkouts, setPullWorkouts] = useState<string[]>([]);
@@ -195,26 +194,12 @@ export default function NotionGraphUi() {
 
   useEffect(() => {
     async function get() {
-      // const resp = await fetch("/api/weight");
-      // const { isPending, error, data } = useQuery({
-      //   queryKey: ["workoutData"],
-      //   queryFn:
-      // })k
-      // const pull = await fetch(
-      //   `/api/workouts?notionToken=${notionToken}&databaseId=${databaseId}`
-      // );
-
       if (!data) {
         return;
       }
       if (isError) {
         return;
       }
-      console.log(data, error, isError, status);
-      // const push = await fetch("/api/push");
-      // console.log(await resp.json());
-      // setWeightData(await resp.json());
-      // const pullJson: IWorkoutApiResp = await pull.json();
       const pullJson = data;
 
       // const pushJson = await push.json();
@@ -223,11 +208,7 @@ export default function NotionGraphUi() {
 
       const pullExercises = pullJson.exercises.sort();
       setExercises(pullExercises);
-      // const pushExercises = Object.entries(pushJson[0].exercises).map(
-      //   ([k, v]) => k
-      // );
       setPullWorkouts(pullExercises);
-      // setPushWorkouts(pushExercises);
     }
     get();
   }, [data]);
@@ -244,22 +225,13 @@ export default function NotionGraphUi() {
 
   return (
     <div className="space-y-10 md:mx-0 px-2">
-      {/* <div>
-        <h2 className="text-xl font-semibold mb-5">Body weight</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <BodyWeightLineChart chartData={weightData} />
-        </div>
-      </div> */}
-
-      {/* write h2 tag as title of link list */}
-
       {notionToken ? (
         <div>
-          <h2 className="text-xl font-semibold mb-5">Exercises</h2>
+          <h2 className="text-3xl font-semibold mb-5"># Exercises</h2>
           <LinkList
             links={exercises.map((e) => ({
               href: `/visualize/${e}`,
-              title: e.toLocaleUpperCase(),
+              title: e,
               description: `visualize the progression on ${e}`,
             }))}
           />
@@ -273,12 +245,12 @@ export default function NotionGraphUi() {
               <AlertDescription>
                 <div>
                   Check out the{" "}
-                  <Link
+                  <TransitionLink
                     className="hover:underline hover:font-semibold hover:cursor-alias"
                     href={"/setup"}
                   >
                     setup
-                  </Link>{" "}
+                  </TransitionLink>{" "}
                   to make steup for ur workouts.
                 </div>
               </AlertDescription>
@@ -288,7 +260,7 @@ export default function NotionGraphUi() {
             <p>Setup ur Notion token and database id first</p>
             <Button className="mt-3">
               {" "}
-              <Link href="/setup">Setup page</Link>
+              <TransitionLink href="/setup">Setup page</TransitionLink>
             </Button>
           </div>
         </>

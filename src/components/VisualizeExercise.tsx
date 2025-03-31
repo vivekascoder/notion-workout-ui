@@ -9,6 +9,8 @@ import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { Book } from "lucide-react";
 import Link from "next/link";
 import { Button } from "./ui/button";
+import { Skeleton } from "./ui/skeleton";
+import { TransitionLink } from "./transition-link";
 
 export default function VisualizeExercise(props: { exercise: string }) {
   const [pullWorkoutData, setPullWorkoutData] = useState<IPullData[]>([]);
@@ -40,7 +42,6 @@ export default function VisualizeExercise(props: { exercise: string }) {
       // );
 
       if (error) {
-        console.log(error);
         return;
       }
       if (!data) {
@@ -60,6 +61,9 @@ export default function VisualizeExercise(props: { exercise: string }) {
     get();
   }, [data]);
 
+  if (isPending) {
+    return <Skeleton className="h-40 rounded-md w-full" />;
+  }
   return (
     <div className="space-y-10 md:mx-0 px-2">
       <div className="w-full">
@@ -78,12 +82,12 @@ export default function VisualizeExercise(props: { exercise: string }) {
                 <AlertDescription>
                   <div>
                     Check out the{" "}
-                    <Link
+                    <TransitionLink
                       className="hover:underline hover:font-semibold hover:cursor-alias"
                       href={"/setup"}
                     >
                       setup
-                    </Link>{" "}
+                    </TransitionLink>{" "}
                     to make steup for ur workouts.
                   </div>
                 </AlertDescription>
@@ -93,7 +97,7 @@ export default function VisualizeExercise(props: { exercise: string }) {
               <p>Setup ur Notion token and database id first</p>
               <Button className="mt-3">
                 {" "}
-                <Link href="/setup">Setup page</Link>
+                <TransitionLink href="/setup">Setup page</TransitionLink>
               </Button>
             </div>
           </>

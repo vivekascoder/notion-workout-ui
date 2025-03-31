@@ -184,12 +184,6 @@ export async function getWeightData() {
   const formatted: { date: string; weight: number }[] = [];
 
   for (const item of data.results) {
-    // Object.entries(database.properties).forEach(
-    //   ([propertyName, propertyValue]) => {
-    //     console.log(`${propertyName}: ${propertyValue.type}`);
-    //   }
-    // );
-
     const obj: { [key: string]: any } = {};
 
     Object.entries((item as any).properties).forEach(
@@ -300,16 +294,6 @@ export function getPnLDaily(data: TFilteredChartData) {
     100
   ).toFixed(2);
 }
-
-// export function getWeightPRs(data: TFilteredChartData) {
-//   if (data.length <= 1) return []; // No PR possible with 0 or 1 data point
-
-//   // weight and max reps
-//   const prs: { [key: number]: number } = {};
-//   for (const d of data) {
-
-//   }
-// }
 
 export function getStreak(data: TFilteredChartData) {
   if (data.length <= 1) return 0; // No streak possible with 0 or 1 data point
