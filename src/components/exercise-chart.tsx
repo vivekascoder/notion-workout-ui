@@ -220,7 +220,8 @@ export function ExerciseChart(props: {
     setWeightPRs(sortedWPrs);
 
     if (sortedWPrs.length > 0) {
-      setMaxRM(sortedWPrs[0].rm1);
+      const d: typeof sortedWPrs = JSON.parse(JSON.stringify(sortedWPrs));
+      setMaxRM(d.sort((a, b) => b.rm1 - a.rm1)[0].rm1);
     }
   }, [mode, props.chartData]);
 
