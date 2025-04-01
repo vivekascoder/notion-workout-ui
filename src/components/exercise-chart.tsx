@@ -33,6 +33,8 @@ import {
 import {
   ChartConfig,
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
@@ -144,12 +146,15 @@ export function ExerciseChart(props: {
     return Math.round(rm / (1 + reps / 30));
   };
 
-  const weightVs1RMData: {
-    date: string;
-    rm1: number;
-    weight: number;
-    visual: string;
-  }[] = [];
+  const [weightVs1RMData, setWeightVs1RMData] = useState<
+    {
+      maxRm: number;
+      date: number;
+      rm1: number;
+      weight: number;
+      visual: string;
+    }[]
+  >([]);
 
   const repsVsWeightData: {
     date: string;
@@ -157,25 +162,6 @@ export function ExerciseChart(props: {
     weight: number;
     visual: string;
   }[] = [];
-
-  props.chartData.forEach((i) => {
-    const parsed = parseLog(i.sets, mode);
-    parsed.sets.map((s) => {
-      weightVs1RMData.push({
-        date: i.date,
-        rm1: s.weight * (1 + s.reps / 30),
-        weight: s.weight,
-        visual: `${s.weight} x ${s.reps}`,
-      });
-
-      repsVsWeightData.push({
-        date: i.date,
-        reps: s.reps,
-        weight: s.weight,
-        visual: `${s.weight} x ${s.reps}`,
-      });
-    });
-  });
 
   useEffect(() => {
     let totalW = 0;
@@ -221,7 +207,30 @@ export function ExerciseChart(props: {
 
     if (sortedWPrs.length > 0) {
       const d: typeof sortedWPrs = JSON.parse(JSON.stringify(sortedWPrs));
-      setMaxRM(d.sort((a, b) => b.rm1 - a.rm1)[0].rm1);
+      const maxRm = d.sort((a, b) => b.rm1 - a.rm1)[0].rm1;
+      setMaxRM(maxRm);
+
+      const wvrmdata: typeof weightVs1RMData = [];
+      props.chartData.forEach((i) => {
+        const parsed = parseLog(i.sets, mode);
+        parsed.sets.map((s) => {
+          wvrmdata.push({
+            maxRm: maxRm,
+            date: new Date(i.date).getTime() / 1000,
+            rm1: s.weight * (1 + s.reps / 30),
+            weight: s.weight,
+            visual: `${s.weight} x ${s.reps}`,
+          });
+
+          repsVsWeightData.push({
+            date: i.date,
+            reps: s.reps,
+            weight: s.weight,
+            visual: `${s.weight} x ${s.reps}`,
+          });
+        });
+      });
+      setWeightVs1RMData(wvrmdata);
     }
   }, [mode, props.chartData]);
 
@@ -376,12 +385,15 @@ export function ExerciseChart(props: {
             >
               <CartesianGrid vertical={false} />
               <XAxis
-                dataKey="weight"
+                dataKey="date"
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
                 tickFormatter={(value) => {
-                  return `${value.toFixed(1)}kg`;
+                  return new Date(value * 1000).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "2-digit",
+                  });
                 }}
               />
               <YAxis
@@ -393,11 +405,95 @@ export function ExerciseChart(props: {
                 }}
               />
 
+              {/* 
+               <ChartTooltip
+              content={
+                <ChartTooltipContent
+                  hideLabel
+                  className="w-[180px]"
+                  formatter={(value, name, item, index) => (
+                    <>
+                      <div
+                        className="h-2.5 w-2.5 shrink-0 rounded-[2px] bg-[--color-bg]"
+                        style={
+                          {
+                            "--color-bg": `var(--color-${name})`,
+                          } as React.CSSProperties
+                        }
+                      />
+                      {chartConfig[name as keyof typeof chartConfig]?.label ||
+                        name}
+                      <div className="ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground">
+                        {value}
+                        <span className="font-normal text-muted-foreground">
+                          kcal
+                        </span>
+                      </div>
+                                           Add this after the last item 
+                      {index === 1 && (
+                        <div className="mt-1.5 flex basis-full items-center border-t pt-1.5 text-xs font-medium text-foreground">
+                          Total
+                          <div className="ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground">
+                            {item.payload.running + item.payload.swimming}
+                            <span className="font-normal text-muted-foreground">
+                              kcal
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                /></ChartContainer>
+               */}
+
               <ChartTooltip
                 cursor={true}
-                content={<ChartTooltipContent indicator="line" />}
+                content={
+                  <ChartTooltipContent
+                    hideLabel
+                    className="w-[250px]"
+                    formatter={(value, name, item, index) => (
+                      <>
+                        <div
+                          className="h-2.5 w-2.5 shrink-0 rounded-[2px] bg-[--color-bg]"
+                          style={
+                            {
+                              "--color-bg": `var(--color-${name})`,
+                            } as React.CSSProperties
+                          }
+                        />
+                        {chartConfig[name as keyof typeof chartConfig]?.label ||
+                          name}
+                        <div className="ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground">
+                          {(value as number).toFixed(1)}
+                          <span className="font-normal text-muted-foreground">
+                            kg
+                          </span>
+                        </div>
+
+                        {index === 2 && (
+                          <div className="mt-1.5 flex basis-full items-center border-t pt-1.5 text-xs font-medium text-foreground">
+                            Set{" "}
+                            {new Date(
+                              item.payload.date * 1000
+                            ).toLocaleDateString()}
+                            :
+                            <div className="ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground">
+                              {item.payload.visual}:{" "}
+                              {(item.payload.rm1 as number).toFixed(1)}
+                              <span className="font-normal text-muted-foreground">
+                                kg
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  />
+                }
               />
               <Line
+                name="set's 1 rep max"
                 dataKey="rm1"
                 type="natural"
                 stroke="var(--color-desktop)"
@@ -409,8 +505,45 @@ export function ExerciseChart(props: {
                   r: 6,
                 }}
               />
+              <Line
+                name="best 1RM of all"
+                dataKey="maxRm"
+                type="natural"
+                stroke="red"
+                strokeWidth={2}
+                dot={{
+                  fill: "var(--color-desktop)",
+                }}
+                activeDot={{
+                  r: 6,
+                }}
+              />
+              <Line
+                name="set's weight"
+                dataKey="weight"
+                type="natural"
+                stroke="yellow"
+                strokeWidth={2}
+                dot={{
+                  fill: "var(--color-desktop)",
+                }}
+                activeDot={{
+                  r: 6,
+                }}
+              />
+              <ChartLegend className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center" />
             </LineChart>
           </ChartContainer>
+          <CardFooter className="block gap-2 text-sm">
+            <div className="flex gap-2 font-medium  justify-between items-center">
+              {"->"} shows you ur intensity with the most intensity you've shown
+              based on estimated 1RM. the close to red line your workout session
+              have been the most intense you've trained.
+              <br />
+              {"->"} shows intensity of ur sets over time based on Epely's
+              formula
+            </div>
+          </CardFooter>
         </CardContent>
       </Card>
 
