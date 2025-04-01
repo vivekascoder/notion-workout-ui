@@ -1,11 +1,4 @@
-import {
-  getDatabaseInitTest,
-  getWeightData,
-  getWorkoutDbData,
-  getWorkoutDbDataForToken,
-  getWorkoutExercises,
-  getWorkoutExercisesForToken,
-} from "@/lib/utils";
+import { getWorkoutExercisesForToken } from "@/lib/utils";
 import { NextRequest } from "next/server";
 
 export async function GET(req: NextRequest) {
