@@ -52,9 +52,6 @@ export async function getPages() {
   return r;
 }
 
-export async function getPullWorkoutData() {
-  return await getSetsLogs(databases.pullWorkout);
-}
 type TSorts = { property: string; direction: "ascending" | "descending" }[];
 type TFilter = {
   property: string;
@@ -62,6 +59,7 @@ type TFilter = {
 };
 
 const getSetsLogs = async (
+  notion: Client,
   databaseId: string,
   sorts?: TSorts,
   filter?: TFilter
@@ -113,13 +111,9 @@ export function getLogFromField(v: any) {
   return val;
 }
 
-export async function getPushWorkoutData() {
-  return getSetsLogs(databases.pushWorkout);
-}
-
-export async function getWorkoutDbData(sorts?: TSorts, filter?: TFilter) {
-  return getSetsLogs(databases.workoutDb, sorts, filter);
-}
+// export async function getPushWorkoutData() {
+//   return getSetsLogs(databases.pushWorkout);
+// }
 
 export async function getWorkoutDbDataForToken(
   notionToken: string,
@@ -130,7 +124,7 @@ export async function getWorkoutDbDataForToken(
   const notion = new Client({
     auth: notionToken,
   });
-  return getSetsLogs(databaseId, sorts, filter);
+  return getSetsLogs(notion, databaseId, sorts, filter);
 }
 
 export async function getWorkoutExercises() {

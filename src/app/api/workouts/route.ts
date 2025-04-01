@@ -1,6 +1,5 @@
 import {
   getWeightData,
-  getWorkoutDbData,
   getWorkoutDbDataForToken,
   getWorkoutExercises,
   getWorkoutExercisesForToken,
